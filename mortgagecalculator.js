@@ -645,7 +645,7 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
 // Helper functions to manage chart visibility
 
 function showComparisonCharts(show) {
-    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
+    const comparisonChartIds = ['chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
     comparisonChartIds.forEach(chartId => {
         const chartDiv = document.getElementById(chartId);
         if (chartDiv) {
@@ -655,7 +655,7 @@ function showComparisonCharts(show) {
 }
 
 function clearComparisonCharts() {
-    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
+    const comparisonChartIds = ['chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
     comparisonChartIds.forEach(chartId => {
         Plotly.purge(chartId);
     });
