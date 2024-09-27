@@ -15,7 +15,7 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   background-color: var(--bg-color);
   transition: background-color 0.3s, color 0.3s;
 }
@@ -23,7 +23,7 @@ body {
 .container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 0 15px;
+  padding: 0 10px;
 }
 
 h1, h2, h3 {
@@ -33,16 +33,15 @@ h1, h2, h3 {
 }
 
 #form-container {
-  max-width: 1200px;
   margin: 0 auto 30px;
   background-color: var(--form-bg);
-  padding: 30px;
+  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px var(--form-shadow);
 }
 
 .input-group {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 label {
@@ -73,7 +72,7 @@ button {
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
-  width: 100%; /* Added to make buttons fill their container */
+  width: 100%;
 }
 
 button:hover {
@@ -194,22 +193,6 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-@media (max-width: 1200px) {
-  #form-container,
-  #amortization-table-container {
-    border-radius: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .input-group-row {
-    flex-direction: column;
-  }
-  .input-group-row .input-group {
-    width: 100%;
-  }
-}
-
 /* Dark Mode Styles */
 body.dark-mode {
   --bg-color: #1a1a1a;
@@ -221,6 +204,28 @@ body.dark-mode {
   --button-hover: #3498db;
   --table-header-bg: #333;
   --table-border: #444;
+}
+
+body.dark-mode #form-container,
+body.dark-mode #amortization-table-container {
+  background-color: var(--form-bg);
+}
+
+body.dark-mode input[type="number"],
+body.dark-mode input[type="text"],
+body.dark-mode input[type="date"] {
+  background-color: var(--form-bg);
+  color: var(--text-color);
+  border-color: var(--input-border);
+}
+
+body.dark-mode label,
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode #amortization-table th,
+body.dark-mode #amortization-table td {
+  color: var(--text-color);
 }
 
 /* Ensure transitions apply when variables change */
@@ -239,6 +244,24 @@ input[type="date"] {
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-label, h1, h2, h3, #amortization-table th, #amortization-table td {
-  transition: color 0.3s;
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .input-group-row {
+    flex-direction: column;
+  }
+
+  .input-group-row .input-group {
+    width: 100%;
+  }
+
+  #form-container, #amortization-table-container {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 1200px) {
+  #form-container,
+  #amortization-table-container {
+    border-radius: 0;
+  }
 }
