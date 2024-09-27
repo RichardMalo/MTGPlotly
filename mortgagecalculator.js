@@ -107,6 +107,12 @@ function calculateMortgage(event) {
     plotTotalPaymentsComparison(scheduleWithoutExtraTotal, scheduleWithExtraTotal, principal, currentLayout);
     plotAnnualPaymentSummary(scheduleWithExtraTotal, currentLayout);
 
+    // New Graphs
+    plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, currentLayout);
+    plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPayments, currentLayout);
+    // Replace the last graph with a cumulative equity comparison
+    plotEquityComparisonOverTime(scheduleWithoutExtraTotal, scheduleWithExtraTotal, principal, currentLayout);
+
     // Create amortization table
     createAmortizationTable(scheduleWithExtraTotal, mortgagePayment, extraPayment, firstPaymentDate);
 
@@ -594,6 +600,131 @@ function plotAnnualPaymentSummary(schedule, layout) {
     Plotly.newPlot('chart11', [traceInterest, tracePrincipal, traceExtra], chartLayout);
 }
 
+// Updated function to extend extra payment range to $2,000
+function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, layout) {
+    const extraPayments = [];
+    const loanTerms = [];
+
+    // Calculate loan term for extra payments ranging from $0 to $2,000 in $50 increments
+    for (let extra = 0; extra <= 2000; extra += 50) {
+        const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+        const schedule = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extra, numPayments);
+        const loanTermYears = (schedule.length / 12).toFixed(2);
+
+        extraPayments.push(extra);
+        loanTerms.push(loanTermYears);
+    }
+
+    const trace = {
+        x: extraPayments,
+        y: loanTerms,
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { color: '#2a9d8f' }, // Subtle Green
+        name: 'Loan Term Reduction'
+    };
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Effect of Extra Payments on Loan Term',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Extra Payment Amount ($)',
+            tickmode: 'linear',
+            dtick: 200
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Loan Term (Years)',
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart12', [trace], chartLayout);
+}
+
+// Updated function to extend extra payment range to $2,000
+function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPayments, layout) {
+    const extraPayments = [];
+    const totalInterests = [];
+
+    // Calculate total interest for extra payments ranging from $0 to $2,000 in $50 increments
+    for (let extra = 0; extra <= 2000; extra += 50) {
+        const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+        const schedule = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extra, numPayments);
+        const totalInterest = schedule.reduce((sum, p) => sum + p.interestPayment, 0).toFixed(2);
+
+        extraPayments.push(extra);
+        totalInterests.push(totalInterest);
+    }
+
+    const trace = {
+        x: extraPayments,
+        y: totalInterests,
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: { color: '#e63946' }, // Muted Red
+        name: 'Total Interest Reduction'
+    };
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Effect of Extra Payments on Total Interest Paid',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Extra Payment Amount ($)',
+            tickmode: 'linear',
+            dtick: 200
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Total Interest Paid ($)',
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart13', [trace], chartLayout);
+}
+
+// New function to plot cumulative equity comparison over time
+function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, principal, layout) {
+    const xValuesWithoutExtra = scheduleWithoutExtra.map(p => p.paymentYear.toFixed(2));
+    const equityWithoutExtra = scheduleWithoutExtra.map(p => (principal - p.remainingBalance).toFixed(2));
+
+    const xValuesWithExtra = scheduleWithExtra.map(p => p.paymentYear.toFixed(2));
+    const equityWithExtra = scheduleWithExtra.map(p => (principal - p.remainingBalance).toFixed(2));
+
+    const traceWithoutExtra = {
+        x: xValuesWithoutExtra,
+        y: equityWithoutExtra,
+        name: 'Without Extra Payments',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#e63946' } // Muted Red
+    };
+
+    const traceWithExtra = {
+        x: xValuesWithExtra,
+        y: equityWithExtra,
+        name: 'With Extra Payments',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#2a9d8f' } // Subtle Green
+    };
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Cumulative Equity Over Time',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Year',
+            tickmode: 'linear',
+            dtick: 1,
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Cumulative Equity ($)',
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout);
+}
+
 function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstPaymentDate) {
     const tableBody = document.querySelector("#amortization-table tbody");
     tableBody.innerHTML = ''; // Clear existing table rows
@@ -689,7 +820,10 @@ window.addEventListener('resize', function() {
     const isDarkMode = document.body.classList.contains('dark-mode');
     const currentLayout = isDarkMode ? darkLayout : lightLayout;
 
-    const charts = ['chart', 'chart2', 'chart3', 'chart4', 'chart6', 'chart7', 'chart8', 'chart9', 'chart10', 'chart11'];
+    const charts = [
+        'chart', 'chart2', 'chart3', 'chart4', 'chart6', 'chart7', 'chart8',
+        'chart9', 'chart10', 'chart11', 'chart12', 'chart13', 'chart14'
+    ];
     charts.forEach(chartId => {
         Plotly.relayout(chartId, {
             width: window.innerWidth * 0.97,
@@ -749,6 +883,9 @@ function popoutGraphs() {
                 <div id="chart9"></div>
                 <div id="chart10"></div>
                 <div id="chart11"></div>
+                <div id="chart12"></div>
+                <div id="chart13"></div>
+                <div id="chart14"></div>
                 <!-- Print Button -->
                 <button onclick="window.print()">Print Out</button>
             </div>
