@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mortgage Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Include Plotly Library -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- Include CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Dark Mode Toggle -->
+    <div class="mode-toggle">
+      <label for="mode-switch">Dark Mode</label>
+      <label class="switch">
+        <input type="checkbox" id="mode-switch">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <!-- Title -->
+    <h1 id="MortgageCalc">Mortgage Calculator</h1>
+    <!-- Form Container -->
+    <div id="form-container">
+      <form id="mortgageForm">
+        <div class="input-group">
+          <label for="principal">Principal Amount:</label>
+          <input type="number" id="principal" value="933000" step="500">
+        </div>
+        <div class="input-group">
+          <label for="amortization">Amortization Period (Years):</label>
+          <input type="number" id="amortization" value="21.5" step="0.1" min="1" max="45">
+        </div>
+        <div class="input-group">
+          <label for="term">Term (Years):</label>
+          <input type="number" id="term" value="2.9" step="0.1" min="1" max="45">
+        </div>
+        <div class="input-group">
+          <label for="interestRate">Interest Rate:</label>
+          <input type="text" id="interestRate" value="2.62%">
+        </div>
+        <div class="input-group">
+          <label for="extraPayment">Extra Payment per Month:</label>
+          <input type="number" id="extraPayment" value="0" step="100">
+        </div>
+        <div class="input-group">
+          <label for="firstPaymentDate">First Payment Date (Optional):</label>
+          <input type="date" id="firstPaymentDate">
+          <button type="button" id="clearDateBtn">Clear Date</button>
+        </div>
+        <div class="input-group-row">
+          <div class="input-group">
+            <label for="extraSavedTerm">Extra Saved for the Term:</label>
+            <input type="number" id="extraSavedTerm" value="0" disabled>
+          </div>
+          <div class="input-group">
+            <label for="extraSavedTotal">Extra Saved for the Total:</label>
+            <input type="number" id="extraSavedTotal" value="0" disabled>
+          </div>
+          <div class="input-group">
+            <label for="paidOffIn">Loan paid off in (Years):</label>
+            <input type="number" id="paidOffIn" value="0" disabled>
+          </div>
+          <div class="input-group">
+            <label for="outOf">Out of (Total Years):</label>
+            <input type="number" id="outOf" value="0" disabled>
+          </div>
+        </div>
+        <div class="input-group full-width">
+          <button type="submit">Calculate Mortgage</button>
+          <button type="button" id="popoutGraphsBtn">Pop out Graphs (DESKTOP ONLY)</button>
+          <button type="button" id="popoutScheduleBtn">Pop out Amortization Schedule (DESKTOP ONLY)</button>
+        </div>
+      </form>
+    </div>
+    <!-- Charts -->
+    <div id="chart"></div>
+    <div id="chart2"></div>
+    <div id="chart3"></div>
+    <div id="chart4"></div>
+    <!-- New Charts -->
+    <div id="chart6"></div>
+    <div id="chart7"></div>
+    <div id="chart8"></div>
+    <div id="chart9"></div>
+    <div id="chart10"></div>
+    <div id="chart11"></div>
+    <!-- Amortization Table -->
+    <div id="amortization-table-container">
+      <h3>Amortization Schedule</h3>
+      <table id="amortization-table">
+        <thead>
+          <tr>
+            <th>Payment # / Date</th>
+            <th>Payment Amount</th>
+            <th>Extra Payment</th>
+            <th>Principal Paid</th>
+            <th>Interest Paid</th>
+            <th>Remaining Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Table rows will be inserted here by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Include JavaScript File -->
+  <script src="mortgagecalculator.js"></script>
+</body>
+</html>
