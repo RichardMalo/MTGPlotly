@@ -1,3 +1,5 @@
+/* style.css */
+
 :root {
   --bg-color: #f7f7f7;
   --text-color: #333;
@@ -15,15 +17,15 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   margin: 0;
-  padding: 10px;
+  padding: 0;
   background-color: var(--bg-color);
   transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
-  max-width: 100%;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 0 10px;
+  padding: 20px;
 }
 
 h1, h2, h3 {
@@ -61,6 +63,7 @@ input[type="date"] {
   font-size: 16px;
   background-color: var(--form-bg);
   color: var(--text-color);
+  box-sizing: border-box;
 }
 
 button {
@@ -104,10 +107,16 @@ button:hover {
   min-width: 200px;
 }
 
-#chart, #chart2, #chart3, #chart4, #chart6, #chart7, #chart8, #chart9, #chart10, #chart11 {
+#charts-container {
+  margin-top: 30px;
+}
+
+#charts-container > div {
   margin-top: 30px;
   width: 100%;
-  max-width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 #amortization-table-container {
@@ -257,11 +266,112 @@ input[type="date"] {
   #form-container, #amortization-table-container {
     padding: 15px;
   }
+
+  #charts-container > div {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 @media (max-width: 1200px) {
   #form-container,
   #amortization-table-container {
     border-radius: 0;
+  }
+}
+
+/* Style for print buttons */
+.print-buttons {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.print-buttons button {
+  margin: 10px;
+  padding: 10px 20px;
+}
+
+/* Adjust input groups inside the results-container */
+#results-container .results-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+#results-container .input-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+#results-container .input-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--text-color);
+  width: 100%;
+}
+
+#results-container .input-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #e9e9e9;
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+
+/* Force labels to have the same height */
+#results-container .input-group label {
+  display: block;
+  min-height: 3em;
+  line-height: 1.2;
+}
+
+/* Print styles */
+@media print {
+  /* Hide everything by default when printing */
+  body * {
+    display: none !important;
+  }
+
+  /* Show charts when printing charts */
+  body.print-charts #charts-container > div {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    page-break-after: always;
+  }
+
+  /* Show amortization schedule when printing schedule */
+  body.print-schedule #amortization-table-container {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Ensure the container occupies full width when printing */
+  body.print-charts .container,
+  body.print-schedule .container {
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  /* Remove margins and padding from body when printing */
+  body.print-charts,
+  body.print-schedule {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Adjust table styles for printing */
+  body.print-schedule #amortization-table {
+    width: 100% !important;
+    font-size: 12pt !important;
+  }
+
+  /* Ensure that page breaks occur appropriately */
+  body.print-charts #charts-container > div:last-child {
+    page-break-after: auto;
   }
 }

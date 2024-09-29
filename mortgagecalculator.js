@@ -1,4 +1,5 @@
-// Define layouts for light and dark modes
+// mortgagecalculator.js
+
 const lightLayout = {
     plot_bgcolor: 'white',
     paper_bgcolor: 'white',
@@ -7,42 +8,42 @@ const lightLayout = {
         gridcolor: '#e1e1e1',
         zerolinecolor: '#e1e1e1',
         titlefont: { color: 'black' },
-        tickfont: { color: 'black' }
+        tickfont: { color: 'black' },
     },
     yaxis: {
         gridcolor: '#e1e1e1',
         zerolinecolor: '#e1e1e1',
         titlefont: { color: 'black' },
-        tickfont: { color: 'black' }
+        tickfont: { color: 'black' },
     },
     legend: {
-        font: { color: 'black' }
+        font: { color: 'black' },
     },
 };
 
 const darkLayout = {
-    plot_bgcolor: '#1a1a1a', // Match the --bg-color in your CSS for dark mode
+    plot_bgcolor: '#1a1a1a',
     paper_bgcolor: '#1a1a1a',
-    font: { color: '#f0f0f0' }, // Match the --text-color in your CSS for dark mode
+    font: { color: '#f0f0f0' },
     xaxis: {
         gridcolor: '#444',
         zerolinecolor: '#444',
         titlefont: { color: '#f0f0f0' },
-        tickfont: { color: '#f0f0f0' }
+        tickfont: { color: '#f0f0f0' },
     },
     yaxis: {
         gridcolor: '#444',
         zerolinecolor: '#444',
         titlefont: { color: '#f0f0f0' },
-        tickfont: { color: '#f0f0f0' }
+        tickfont: { color: '#f0f0f0' },
     },
     legend: {
-        font: { color: '#f0f0f0' }
+        font: { color: '#f0f0f0' },
     },
 };
 
 function calculateMortgage(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
 
     const principal = parseFloat(document.getElementById("principal").value);
     const amortization = parseFloat(document.getElementById("amortization").value);
@@ -62,38 +63,31 @@ function calculateMortgage(event) {
 
     const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
 
-    // Compute amortization schedules
     const scheduleWithExtraTotal = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extraPayment, numPayments);
 
-    // Determine the current mode
     const isDarkMode = document.body.classList.contains('dark-mode');
     const currentLayout = isDarkMode ? darkLayout : lightLayout;
 
-    // Plot charts with the selected layout
     plotPaymentBreakdown(scheduleWithExtraTotal, currentLayout);
     plotCumulativeChart(scheduleWithExtraTotal, currentLayout);
     plotEquityBuildUp(scheduleWithExtraTotal, principal, currentLayout);
 
-    // Conditionally plot comparison graphs if extraPayment > 0
+    let scheduleWithoutExtraTotal = null;
     if (extraPayment > 0) {
-        const scheduleWithoutExtraTotal = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, 0, numPayments);
+        scheduleWithoutExtraTotal = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, 0, numPayments);
 
-        // Compute total interest paid
         const totalInterestPaidWithoutExtraTotal = scheduleWithoutExtraTotal.reduce((sum, p) => sum + p.interestPayment, 0);
         const totalInterestPaidWithExtraTotal = scheduleWithExtraTotal.reduce((sum, p) => sum + p.interestPayment, 0);
 
-        // Compute savings
         const extraSavedTotal = totalInterestPaidWithoutExtraTotal - totalInterestPaidWithExtraTotal;
 
         document.getElementById("extraSavedTotal").value = extraSavedTotal.toFixed(2);
 
-        // Update loan payoff information in years
         const loanPaidOffInYears = (scheduleWithExtraTotal.length / 12).toFixed(2);
         const totalLoanYears = (numPayments / 12).toFixed(2);
         document.getElementById("paidOffIn").value = loanPaidOffInYears;
         document.getElementById("outOf").value = totalLoanYears;
 
-        // Plot comparison graphs
         plotRemainingBalanceComparison(scheduleWithoutExtraTotal, scheduleWithExtraTotal, currentLayout);
         plotTotalInterestComparison(totalInterestPaidWithoutExtraTotal, totalInterestPaidWithExtraTotal, currentLayout);
         plotLoanTermComparison(scheduleWithoutExtraTotal.length, scheduleWithExtraTotal.length, currentLayout);
@@ -101,46 +95,22 @@ function calculateMortgage(event) {
         plotTotalPaymentsComparison(scheduleWithoutExtraTotal, scheduleWithExtraTotal, principal, currentLayout);
         plotEquityComparisonOverTime(scheduleWithoutExtraTotal, scheduleWithExtraTotal, principal, currentLayout);
 
-        // Show comparison chart divs
         showComparisonCharts(true);
     } else {
-        // Clear the comparison charts and hide them
         clearComparisonCharts();
         showComparisonCharts(false);
 
-        // Set values to N/A when extraPayment is zero
         document.getElementById("extraSavedTotal").value = "0.00";
         document.getElementById("paidOffIn").value = (numPayments / 12).toFixed(2);
         document.getElementById("outOf").value = (numPayments / 12).toFixed(2);
     }
 
-    // Plot other charts that don't require comparison
     plotInterestPrincipalComponents(scheduleWithExtraTotal, currentLayout);
     plotAnnualPaymentSummary(scheduleWithExtraTotal, currentLayout);
     plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, currentLayout);
     plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPayments, currentLayout);
 
-    // Create amortization table
     createAmortizationTable(scheduleWithExtraTotal, mortgagePayment, extraPayment, firstPaymentDate);
-
-    // Store data in localStorage for pop-out windows
-    const mortgageData = {
-        principal,
-        amortization,
-        term,
-        interestRate,
-        extraPayment,
-        firstPaymentDate,
-        monthlyRate,
-        numPayments,
-        termPayments,
-        mortgagePayment,
-        scheduleWithExtraTotal,
-        // Include comparison schedules only if extraPayment > 0
-        scheduleWithoutExtraTotal: extraPayment > 0 ? scheduleWithoutExtraTotal : null,
-    };
-
-    localStorage.setItem('mortgageData', JSON.stringify(mortgageData));
 }
 
 function computeAmortizationSchedule(balance, monthlyRate, mortgagePayment, extraPayment, numPayments) {
@@ -179,8 +149,6 @@ function computeAmortizationSchedule(balance, monthlyRate, mortgagePayment, extr
     return schedule;
 }
 
-// Plotting functions
-
 function plotPaymentBreakdown(schedule, layout) {
     const data = schedule.map(p => ({
         x: p.paymentYear,
@@ -196,7 +164,7 @@ function plotPaymentBreakdown(schedule, layout) {
         type: 'bar',
         text: data.map((d) => `$${d.y[2].toFixed(2)}`),
         textposition: 'auto',
-        marker: { color: '#2a9d8f' } // Subtle Green
+        marker: { color: '#2a9d8f' }
     };
 
     const tracePrincipal = {
@@ -206,7 +174,7 @@ function plotPaymentBreakdown(schedule, layout) {
         type: 'bar',
         text: data.map((d) => `$${d.y[0].toFixed(2)}`),
         textposition: 'auto',
-        marker: { color: '#457b9d' } // Professional Blue
+        marker: { color: '#457b9d' }
     };
 
     const traceInterest = {
@@ -216,7 +184,7 @@ function plotPaymentBreakdown(schedule, layout) {
         type: 'bar',
         text: data.map((d) => `$${d.y[1].toFixed(2)}`),
         textposition: 'auto',
-        marker: { color: '#e63946' } // Muted Red
+        marker: { color: '#e63946' }
     };
 
     const chartLayout = Object.assign({}, layout, {
@@ -243,9 +211,6 @@ function plotCumulativeChart(schedule, layout) {
     const cumulativePayments = [];
     let totalPayment = 0;
 
-    // Ensure the chart starts from 0,0
-    cumulativePayments.push({ x: 0, y: 0 });
-
     schedule.forEach((p) => {
         totalPayment += Math.max(0, p.principalPayment + p.interestPayment + p.extraPayment);
         cumulativePayments.push({ x: p.paymentYear, y: totalPayment });
@@ -260,8 +225,15 @@ function plotCumulativeChart(schedule, layout) {
         name: 'Cumulative Payments',
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { color: '#457b9d' } // Professional Blue
+        marker: { color: '#457b9d' }
     };
+
+    const xStart = 0;
+    const xEnd = xValues[xValues.length - 1];
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...yValues);
+    const yPadding = yEnd * 0.05;
 
     const chartLayout = Object.assign({}, layout, {
         title: 'Cumulative Payments Over Time',
@@ -269,11 +241,12 @@ function plotCumulativeChart(schedule, layout) {
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [0, xValues[xValues.length - 1]] // Set x-axis range explicitly to start from 0
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Payments',
-            range: [0, Math.max(...yValues)] // Force y-axis to start at 0 and adjust to max value
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -290,24 +263,37 @@ function plotEquityBuildUp(schedule, principal, layout) {
         y: (principal - p.remainingBalance).toFixed(2)
     }));
 
+    const xValues = equityData.map((d) => parseFloat(d.x));
+    const yValues = equityData.map((d) => parseFloat(d.y));
+
     const trace = {
-        x: equityData.map((d) => d.x),
-        y: equityData.map((d) => d.y),
+        x: xValues,
+        y: yValues,
         name: 'Home Equity',
         type: 'scatter',
         mode: 'lines',
-        line: { color: '#2a9d8f' } // Subtle Green
+        line: { color: '#2a9d8f' }
     };
+
+    const xStart = 0;
+    const xEnd = Math.max(...xValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...yValues);
+    const yPadding = yEnd * 0.05;
 
     const chartLayout = Object.assign({}, layout, {
         title: 'Equity Build-up Over Time',
         xaxis: Object.assign({}, layout.xaxis, {
             title: 'Year',
             tickmode: 'linear',
-            dtick: 1
+            dtick: 1,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Equity',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -319,7 +305,7 @@ function plotEquityBuildUp(schedule, principal, layout) {
 }
 
 function plotInterestPrincipalComponents(schedule, layout) {
-    const xValues = schedule.map(p => p.paymentYear.toFixed(2));
+    const xValues = schedule.map(p => parseFloat(p.paymentYear.toFixed(2)));
     const principalPayments = schedule.map(p => p.principalPayment + p.extraPayment);
     const interestPayments = schedule.map(p => p.interestPayment);
 
@@ -330,7 +316,7 @@ function plotInterestPrincipalComponents(schedule, layout) {
         type: 'scatter',
         mode: 'lines',
         fill: 'tonexty',
-        line: { color: '#457b9d' } // Professional Blue
+        line: { color: '#457b9d' }
     };
 
     const traceInterest = {
@@ -340,18 +326,28 @@ function plotInterestPrincipalComponents(schedule, layout) {
         type: 'scatter',
         mode: 'lines',
         fill: 'tonexty',
-        line: { color: '#e63946' } // Muted Red
+        line: { color: '#e63946' }
     };
+
+    const xStart = 0;
+    const xEnd = Math.max(...xValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...principalPayments, ...interestPayments);
+    const yPadding = yEnd * 0.05;
 
     const chartLayout = Object.assign({}, layout, {
         title: 'Interest vs Principal Components Over Time',
         xaxis: Object.assign({}, layout.xaxis, {
             title: 'Year',
             tickmode: 'linear',
-            dtick: 1
+            dtick: 1,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Payment Amount',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -389,7 +385,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
         y: principalPayments.map(v => v.toFixed(2)),
         name: 'Principal',
         type: 'bar',
-        marker: { color: '#457b9d' } // Professional Blue
+        marker: { color: '#457b9d' }
     };
 
     const traceInterest = {
@@ -397,7 +393,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
         y: interestPayments.map(v => v.toFixed(2)),
         name: 'Interest',
         type: 'bar',
-        marker: { color: '#e63946' } // Muted Red
+        marker: { color: '#e63946' }
     };
 
     const traceExtra = {
@@ -405,7 +401,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
         y: extraPayments.map(v => v.toFixed(2)),
         name: 'Extra Payment',
         type: 'bar',
-        marker: { color: '#2a9d8f' } // Subtle Green
+        marker: { color: '#2a9d8f' }
     };
 
     const chartLayout = Object.assign({}, layout, {
@@ -426,36 +422,53 @@ function plotAnnualPaymentSummary(schedule, layout) {
     Plotly.newPlot('chart11', [traceInterest, tracePrincipal, traceExtra], chartLayout);
 }
 
-// Comparison plotting functions (conditionally called)
-
 function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra, layout) {
+    const xValuesWithoutExtra = scheduleWithoutExtra.map((d) => parseFloat(d.paymentYear.toFixed(2)));
+    const yValuesWithoutExtra = scheduleWithoutExtra.map((d) => d.remainingBalance.toFixed(2));
+
+    const xValuesWithExtra = scheduleWithExtra.map((d) => parseFloat(d.paymentYear.toFixed(2)));
+    const yValuesWithExtra = scheduleWithExtra.map((d) => d.remainingBalance.toFixed(2));
+
     const trace1 = {
-        x: scheduleWithoutExtra.map((d) => d.paymentYear.toFixed(2)),
-        y: scheduleWithoutExtra.map((d) => d.remainingBalance.toFixed(2)),
+        x: xValuesWithoutExtra,
+        y: yValuesWithoutExtra,
         name: 'Without Extra Payments',
         type: 'scatter',
         mode: 'lines',
-        line: { color: '#457b9d' } // Professional Blue
+        line: { color: '#e63946' }
     };
 
     const trace2 = {
-        x: scheduleWithExtra.map((d) => d.paymentYear.toFixed(2)),
-        y: scheduleWithExtra.map((d) => d.remainingBalance.toFixed(2)),
+        x: xValuesWithExtra,
+        y: yValuesWithExtra,
         name: 'With Extra Payments',
         type: 'scatter',
         mode: 'lines',
-        line: { color: '#2a9d8f' } // Subtle Green
+        line: { color: '#2a9d8f' }
     };
+
+    const allXValues = xValuesWithoutExtra.concat(xValuesWithExtra);
+    const allYValues = yValuesWithoutExtra.concat(yValuesWithExtra).map(y => parseFloat(y));
+
+    const xStart = 0;
+    const xEnd = Math.max(...allXValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...allYValues);
+    const yPadding = yEnd * 0.05;
 
     const chartLayout = Object.assign({}, layout, {
         title: 'Remaining Balance Over Time',
         xaxis: Object.assign({}, layout.xaxis, {
             title: 'Year',
             tickmode: 'linear',
-            dtick: 1
+            dtick: 1,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Remaining Balance',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -472,7 +485,7 @@ function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWit
             x: ['Without Extra Payments', 'With Extra Payments'],
             y: [totalInterestWithoutExtra.toFixed(2), totalInterestWithExtra.toFixed(2)],
             type: 'bar',
-            marker: { color: ['#e63946', '#457b9d'] }, // Muted Red and Professional Blue
+            marker: { color: ['#e63946', '#2a9d8f'] },
             text: [`$${totalInterestWithoutExtra.toFixed(2)}`, `$${totalInterestWithExtra.toFixed(2)}`],
             textposition: 'auto'
         }
@@ -504,7 +517,7 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
             x: ['Without Extra Payments', 'With Extra Payments'],
             y: [termWithoutExtraYears, termWithExtraYears],
             type: 'bar',
-            marker: { color: ['#e63946', '#457b9d'] }, // Muted Red and Professional Blue
+            marker: { color: ['#e63946', '#2a9d8f'] },
             text: [`${termWithoutExtraYears} years`, `${termWithExtraYears} years`],
             textposition: 'auto'
         }
@@ -539,10 +552,16 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
         cumulativeInterestWithoutExtra += scheduleWithoutExtra[i] ? scheduleWithoutExtra[i].interestPayment : 0;
         cumulativeInterestWithExtra += scheduleWithExtra[i] ? scheduleWithExtra[i].interestPayment : 0;
         xValues.push((i + 1) / 12);
-
         const savings = cumulativeInterestWithoutExtra - cumulativeInterestWithExtra;
         interestSavings.push(savings);
     }
+
+    const xStart = 0;
+    const xEnd = xValues[xValues.length - 1];
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...interestSavings);
+    const yPadding = yEnd * 0.05;
 
     const trace = {
         x: xValues.map(x => x.toFixed(2)),
@@ -550,7 +569,7 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
         name: 'Interest Savings',
         type: 'scatter',
         mode: 'lines',
-        line: { color: '#2a9d8f' }, // Subtle Green
+        line: { color: '#2a9d8f' },
     };
 
     const chartLayout = Object.assign({}, layout, {
@@ -559,9 +578,12 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Interest Savings',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -579,7 +601,7 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
             x: ['Without Extra Payments', 'With Extra Payments'],
             y: [totalPaidWithoutExtra.toFixed(2), totalPaidWithExtra.toFixed(2)],
             type: 'bar',
-            marker: { color: ['#e63946', '#457b9d'] }, // Muted Red and Professional Blue
+            marker: { color: ['#e63946', '#2a9d8f'] },
             text: [`$${totalPaidWithoutExtra.toFixed(2)}`, `$${totalPaidWithExtra.toFixed(2)}`],
             textposition: 'auto'
         }
@@ -601,10 +623,10 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
 }
 
 function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, principal, layout) {
-    const xValuesWithoutExtra = scheduleWithoutExtra.map(p => p.paymentYear.toFixed(2));
+    const xValuesWithoutExtra = scheduleWithoutExtra.map(p => parseFloat(p.paymentYear.toFixed(2)));
     const equityWithoutExtra = scheduleWithoutExtra.map(p => (principal - p.remainingBalance).toFixed(2));
 
-    const xValuesWithExtra = scheduleWithExtra.map(p => p.paymentYear.toFixed(2));
+    const xValuesWithExtra = scheduleWithExtra.map(p => parseFloat(p.paymentYear.toFixed(2)));
     const equityWithExtra = scheduleWithExtra.map(p => (principal - p.remainingBalance).toFixed(2));
 
     const traceWithoutExtra = {
@@ -613,7 +635,7 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
         name: 'Without Extra Payments',
         type: 'scatter',
         mode: 'lines',
-        line: { color: '#e63946' } // Muted Red
+        line: { color: '#e63946' }
     };
 
     const traceWithExtra = {
@@ -622,8 +644,18 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
         name: 'With Extra Payments',
         type: 'scatter',
         mode: 'lines',
-        line: { color: '#2a9d8f' } // Subtle Green
+        line: { color: '#2a9d8f' }
     };
+
+    const allXValues = xValuesWithoutExtra.concat(xValuesWithExtra);
+    const allYValues = equityWithoutExtra.concat(equityWithExtra).map(y => parseFloat(y));
+
+    const xStart = 0;
+    const xEnd = Math.max(...allXValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...allYValues);
+    const yPadding = yEnd * 0.05;
 
     const chartLayout = Object.assign({}, layout, {
         title: 'Cumulative Equity Over Time',
@@ -631,9 +663,12 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Cumulative Equity ($)',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -642,32 +677,10 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
     Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout);
 }
 
-// Helper functions to manage chart visibility
-
-function showComparisonCharts(show) {
-    const comparisonChartIds = ['chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
-    comparisonChartIds.forEach(chartId => {
-        const chartDiv = document.getElementById(chartId);
-        if (chartDiv) {
-            chartDiv.style.display = show ? 'block' : 'none';
-        }
-    });
-}
-
-function clearComparisonCharts() {
-    const comparisonChartIds = ['chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
-    comparisonChartIds.forEach(chartId => {
-        Plotly.purge(chartId);
-    });
-}
-
-// New functions for extended extra payment range
-
 function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, layout) {
     const extraPayments = [];
     const loanTerms = [];
 
-    // Calculate loan term for extra payments ranging from $0 to $2,000 in $50 increments
     for (let extra = 0; extra <= 2000; extra += 50) {
         const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
         const schedule = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extra, numPayments);
@@ -677,12 +690,19 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
         loanTerms.push(loanTermYears);
     }
 
+    const xStart = 0;
+    const xEnd = Math.max(...extraPayments);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = Math.min(...loanTerms);
+    const yEnd = Math.max(...loanTerms);
+    const yPadding = yEnd * 0.05;
+
     const trace = {
         x: extraPayments,
         y: loanTerms,
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { color: '#2a9d8f' }, // Subtle Green
+        marker: { color: '#2a9d8f' },
         name: 'Loan Term Reduction'
     };
 
@@ -691,10 +711,13 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
         xaxis: Object.assign({}, layout.xaxis, {
             title: 'Extra Payment Amount ($)',
             tickmode: 'linear',
-            dtick: 200
+            dtick: 200,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Loan Term (Years)',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -707,7 +730,6 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
     const extraPayments = [];
     const totalInterests = [];
 
-    // Calculate total interest for extra payments ranging from $0 to $2,000 in $50 increments
     for (let extra = 0; extra <= 2000; extra += 50) {
         const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
         const schedule = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extra, numPayments);
@@ -717,12 +739,19 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
         totalInterests.push(totalInterest);
     }
 
+    const xStart = 0;
+    const xEnd = Math.max(...extraPayments);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = Math.min(...totalInterests);
+    const yEnd = Math.max(...totalInterests);
+    const yPadding = yEnd * 0.05;
+
     const trace = {
         x: extraPayments,
         y: totalInterests,
         type: 'scatter',
         mode: 'lines+markers',
-        marker: { color: '#e63946' }, // Muted Red
+        marker: { color: '#e63946' },
         name: 'Total Interest Reduction'
     };
 
@@ -731,10 +760,13 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
         xaxis: Object.assign({}, layout.xaxis, {
             title: 'Extra Payment Amount ($)',
             tickmode: 'linear',
-            dtick: 200
+            dtick: 200,
+            range: [xStart - xPadding, xEnd + xPadding],
+            zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Interest Paid ($)',
+            range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
@@ -745,7 +777,7 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
 
 function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstPaymentDate) {
     const tableBody = document.querySelector("#amortization-table tbody");
-    tableBody.innerHTML = ''; // Clear existing table rows
+    tableBody.innerHTML = '';
 
     let totalInterest = 0;
     let totalPrincipal = 0;
@@ -753,10 +785,9 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
 
     let currentDate = null;
     if (firstPaymentDate) {
-        // Parse the date components explicitly
         const dateParts = firstPaymentDate.split('-');
         const year = parseInt(dateParts[0]);
-        const month = parseInt(dateParts[1]) - 1; // Months are zero-based
+        const month = parseInt(dateParts[1]) - 1;
         const day = parseInt(dateParts[2]);
         currentDate = new Date(year, month, day);
     }
@@ -768,7 +799,6 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
 
         const row = document.createElement('tr');
 
-        // Create the payment number or date cell
         const paymentCell = document.createElement('td');
         if (currentDate) {
             paymentCell.textContent = formatDate(currentDate);
@@ -778,7 +808,6 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
         }
         row.appendChild(paymentCell);
 
-        // Add the rest of the cells
         row.innerHTML += `
             <td>$${(p.principalPayment + p.interestPayment + p.extraPayment).toFixed(2)}</td>
             <td>$${p.extraPayment.toFixed(2)}</td>
@@ -790,7 +819,6 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
         tableBody.appendChild(row);
     });
 
-    // Add a summary row
     const summaryRow = document.createElement('tr');
     summaryRow.innerHTML = `
         <td colspan="2"><strong>Totals</strong></td>
@@ -806,7 +834,6 @@ function clearDate() {
     const firstPaymentDateInput = document.getElementById("firstPaymentDate");
     firstPaymentDateInput.value = "";
 
-    // Recalculate the mortgage to update the amortization table
     calculateMortgage(new Event('submit'));
 }
 
@@ -815,6 +842,7 @@ function formatDate(date) {
     return date.toLocaleDateString('en-US', options);
 }
 
+// Event listeners
 const form = document.getElementById("mortgageForm");
 form.addEventListener("submit", calculateMortgage);
 
@@ -830,8 +858,7 @@ modeSwitch.addEventListener('change', () => {
     } else {
         body.classList.remove('dark-mode');
     }
-    // Recalculate the mortgage to update charts with the new layout
-    calculateMortgage(new Event('submit'));
+    calculateMortgage();
 });
 
 window.addEventListener('resize', function() {
@@ -840,7 +867,6 @@ window.addEventListener('resize', function() {
 
     const charts = [
         'chart', 'chart2', 'chart4', 'chart6', 'chart11', 'chart12', 'chart13',
-        // Include comparison charts if they are visible
         'chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'
     ];
     charts.forEach(chartId => {
@@ -863,107 +889,46 @@ window.addEventListener('resize', function() {
     });
 });
 
-// Add event listeners for the new buttons
-const popoutGraphsBtn = document.getElementById('popoutGraphsBtn');
-popoutGraphsBtn.addEventListener('click', popoutGraphs);
+const printChartsBtn = document.getElementById('printChartsBtn');
+printChartsBtn.addEventListener('click', printCharts);
 
-const popoutScheduleBtn = document.getElementById('popoutScheduleBtn');
-popoutScheduleBtn.addEventListener('click', popoutSchedule);
+const printScheduleBtn = document.getElementById('printScheduleBtn');
+printScheduleBtn.addEventListener('click', printAmortizationSchedule);
 
-// Function to pop out graphs
-function popoutGraphs() {
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(`
-        <html>
-        <head>
-            <title>Mortgage Graphs</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <!-- Include CSS Stylesheet -->
-            <link rel="stylesheet" href="style.css">
-            <!-- Include Plotly Library -->
-            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        </head>
-        <body>
-            <div class="container">
-                <!-- Dark Mode Toggle -->
-                <div class="mode-toggle">
-                    <label for="mode-switch">Dark Mode</label>
-                    <label class="switch">
-                        <input type="checkbox" id="mode-switch">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <h2>Mortgage Graphs</h2>
-                <!-- Charts -->
-                <div id="chart"></div>
-                <div id="chart2"></div>
-                <div id="chart4"></div>
-                <div id="chart6"></div>
-                <div id="chart11"></div>
-                <div id="chart12"></div>
-                <div id="chart13"></div>
-                <!-- Comparison Charts -->
-                <div id="chart3"></div>
-                <div id="chart7"></div>
-                <div id="chart8"></div>
-                <div id="chart9"></div>
-                <div id="chart10"></div>
-                <div id="chart14"></div>
-                <!-- Print Button -->
-                <button onclick="window.print()">Print Out</button>
-            </div>
-            <!-- Include JavaScript File -->
-            <script src="popoutgraphs.js"></script>
-        </body>
-        </html>
-    `);
+function printCharts() {
+    calculateMortgage();
+
+    document.body.classList.add('print-charts');
+
+    window.print();
 }
 
-// Function to pop out amortization schedule
-function popoutSchedule() {
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(`
-        <html>
-        <head>
-            <title>Amortization Schedule</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <!-- Include CSS Stylesheet -->
-            <link rel="stylesheet" href="style.css">
-        </head>
-        <body>
-            <div class="container">
-                <!-- Dark Mode Toggle -->
-                <div class="mode-toggle">
-                    <label for="mode-switch">Dark Mode</label>
-                    <label class="switch">
-                        <input type="checkbox" id="mode-switch">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <h2>Amortization Schedule</h2>
-                <div id="amortization-table-container">
-                    <table id="amortization-table">
-                        <thead>
-                            <tr>
-                                <th>Payment # / Date</th>
-                                <th>Payment Amount</th>
-                                <th>Extra Payment</th>
-                                <th>Principal Paid</th>
-                                <th>Interest Paid</th>
-                                <th>Remaining Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Table rows will be inserted here by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Print Button -->
-                <button onclick="window.print()">Print Out</button>
-            </div>
-            <!-- Include JavaScript File -->
-            <script src="popoutschedule.js"></script>
-        </body>
-        </html>
-    `);
+function printAmortizationSchedule() {
+    calculateMortgage();
+
+    document.body.classList.add('print-schedule');
+
+    window.print();
+}
+
+window.addEventListener('afterprint', () => {
+    document.body.classList.remove('print-charts');
+    document.body.classList.remove('print-schedule');
+});
+
+function showComparisonCharts(show) {
+    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
+    comparisonChartIds.forEach(chartId => {
+        const chartDiv = document.getElementById(chartId);
+        if (chartDiv) {
+            chartDiv.style.display = show ? 'block' : 'none';
+        }
+    });
+}
+
+function clearComparisonCharts() {
+    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
+    comparisonChartIds.forEach(chartId => {
+        Plotly.purge(chartId);
+    });
 }
