@@ -241,7 +241,7 @@ function plotCumulativeChart(schedule, layout) {
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -288,7 +288,7 @@ function plotEquityBuildUp(schedule, principal, layout) {
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -342,7 +342,7 @@ function plotInterestPrincipalComponents(schedule, layout) {
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -463,7 +463,7 @@ function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra,
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -578,7 +578,7 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -663,7 +663,7 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -712,7 +712,7 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
             title: 'Extra Payment Amount ($)',
             tickmode: 'linear',
             dtick: 200,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -761,7 +761,7 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
             title: 'Extra Payment Amount ($)',
             tickmode: 'linear',
             dtick: 200,
-            range: [xStart - xPadding, xEnd + xPadding],
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
@@ -888,6 +888,50 @@ window.addEventListener('resize', function() {
         }
     });
 });
+
+const printChartsBtn = document.getElementById('printChartsBtn');
+printChartsBtn.addEventListener('click', printCharts);
+
+const printScheduleBtn = document.getElementById('printScheduleBtn');
+printScheduleBtn.addEventListener('click', printAmortizationSchedule);
+
+function printCharts() {
+    calculateMortgage();
+
+    document.body.classList.add('print-charts');
+
+    window.print();
+}
+
+function printAmortizationSchedule() {
+    calculateMortgage();
+
+    document.body.classList.add('print-schedule');
+
+    window.print();
+}
+
+window.addEventListener('afterprint', () => {
+    document.body.classList.remove('print-charts');
+    document.body.classList.remove('print-schedule');
+});
+
+function showComparisonCharts(show) {
+    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
+    comparisonChartIds.forEach(chartId => {
+        const chartDiv = document.getElementById(chartId);
+        if (chartDiv) {
+            chartDiv.style.display = show ? 'block' : 'none';
+        }
+    });
+}
+
+function clearComparisonCharts() {
+    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
+    comparisonChartIds.forEach(chartId => {
+        Plotly.purge(chartId);
+    });
+}
 
 const printChartsBtn = document.getElementById('printChartsBtn');
 printChartsBtn.addEventListener('click', printCharts);
