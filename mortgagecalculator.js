@@ -59,9 +59,9 @@ function calculateMortgage(event) {
 
     const monthlyRate = interestRate / 12;
     const numPayments = Math.round(amortization * 12);
-    const termPayments = Math.round(term * 12);
 
-    const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+    const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+        (Math.pow(1 + monthlyRate, numPayments) - 1);
 
     const scheduleWithExtraTotal = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extraPayment, numPayments);
 
@@ -731,7 +731,8 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
     const totalInterests = [];
 
     for (let extra = 0; extra <= 2000; extra += 50) {
-        const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+        const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
+            (Math.pow(1 + monthlyRate, numPayments) - 1);
         const schedule = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extra, numPayments);
         const totalInterest = schedule.reduce((sum, p) => sum + p.interestPayment, 0).toFixed(2);
 
@@ -843,101 +844,59 @@ function formatDate(date) {
 }
 
 // Event listeners
-const form = document.getElementById("mortgageForm");
-form.addEventListener("submit", calculateMortgage);
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById("mortgageForm");
+    form.addEventListener("submit", calculateMortgage);
 
-const clearDateBtn = document.getElementById("clearDateBtn");
-clearDateBtn.addEventListener("click", clearDate);
+    const clearDateBtn = document.getElementById("clearDateBtn");
+    clearDateBtn.addEventListener("click", clearDate);
 
-const modeSwitch = document.getElementById('mode-switch');
-const body = document.body;
+    const modeSwitch = document.getElementById('mode-switch');
+    const body = document.body;
 
-modeSwitch.addEventListener('change', () => {
-    if (modeSwitch.checked) {
-        body.classList.add('dark-mode');
-    } else {
-        body.classList.remove('dark-mode');
-    }
-    calculateMortgage();
-});
-
-window.addEventListener('resize', function() {
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const currentLayout = isDarkMode ? darkLayout : lightLayout;
-
-    const charts = [
-        'chart', 'chart2', 'chart4', 'chart6', 'chart11', 'chart12', 'chart13',
-        'chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'
-    ];
-    charts.forEach(chartId => {
-        const chartDiv = document.getElementById(chartId);
-        if (chartDiv && chartDiv.style.display !== 'none') {
-            Plotly.relayout(chartId, {
-                width: window.innerWidth * 0.97,
-                'paper_bgcolor': currentLayout.paper_bgcolor,
-                'plot_bgcolor': currentLayout.plot_bgcolor,
-                'font.color': currentLayout.font.color,
-                'xaxis.tickfont.color': currentLayout.xaxis.tickfont.color,
-                'yaxis.tickfont.color': currentLayout.yaxis.tickfont.color,
-                'xaxis.titlefont.color': currentLayout.xaxis.titlefont.color,
-                'yaxis.titlefont.color': currentLayout.yaxis.titlefont.color,
-                'xaxis.gridcolor': currentLayout.xaxis.gridcolor,
-                'yaxis.gridcolor': currentLayout.yaxis.gridcolor,
-                'legend.font.color': currentLayout.legend.font.color
-            });
+    modeSwitch.addEventListener('change', () => {
+        if (modeSwitch.checked) {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
         }
+        calculateMortgage();
     });
+
+    window.addEventListener('resize', function () {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const currentLayout = isDarkMode ? darkLayout : lightLayout;
+
+        const charts = [
+            'chart', 'chart2', 'chart4', 'chart6', 'chart11', 'chart12', 'chart13',
+            'chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'
+        ];
+        charts.forEach(chartId => {
+            const chartDiv = document.getElementById(chartId);
+            if (chartDiv && chartDiv.style.display !== 'none') {
+                Plotly.relayout(chartId, {
+                    width: window.innerWidth * 0.97,
+                    'paper_bgcolor': currentLayout.paper_bgcolor,
+                    'plot_bgcolor': currentLayout.plot_bgcolor,
+                    'font.color': currentLayout.font.color,
+                    'xaxis.tickfont.color': currentLayout.xaxis.tickfont.color,
+                    'yaxis.tickfont.color': currentLayout.yaxis.tickfont.color,
+                    'xaxis.titlefont.color': currentLayout.xaxis.titlefont.color,
+                    'yaxis.titlefont.color': currentLayout.yaxis.titlefont.color,
+                    'xaxis.gridcolor': currentLayout.xaxis.gridcolor,
+                    'yaxis.gridcolor': currentLayout.yaxis.gridcolor,
+                    'legend.font.color': currentLayout.legend.font.color
+                });
+            }
+        });
+    });
+
+    const printChartsBtn = document.getElementById('printChartsBtn');
+    printChartsBtn.addEventListener('click', printCharts);
+
+    const printScheduleBtn = document.getElementById('printScheduleBtn');
+    printScheduleBtn.addEventListener('click', printAmortizationSchedule);
 });
-
-const printChartsBtn = document.getElementById('printChartsBtn');
-printChartsBtn.addEventListener('click', printCharts);
-
-const printScheduleBtn = document.getElementById('printScheduleBtn');
-printScheduleBtn.addEventListener('click', printAmortizationSchedule);
-
-function printCharts() {
-    calculateMortgage();
-
-    document.body.classList.add('print-charts');
-
-    window.print();
-}
-
-function printAmortizationSchedule() {
-    calculateMortgage();
-
-    document.body.classList.add('print-schedule');
-
-    window.print();
-}
-
-window.addEventListener('afterprint', () => {
-    document.body.classList.remove('print-charts');
-    document.body.classList.remove('print-schedule');
-});
-
-function showComparisonCharts(show) {
-    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
-    comparisonChartIds.forEach(chartId => {
-        const chartDiv = document.getElementById(chartId);
-        if (chartDiv) {
-            chartDiv.style.display = show ? 'block' : 'none';
-        }
-    });
-}
-
-function clearComparisonCharts() {
-    const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
-    comparisonChartIds.forEach(chartId => {
-        Plotly.purge(chartId);
-    });
-}
-
-const printChartsBtn = document.getElementById('printChartsBtn');
-printChartsBtn.addEventListener('click', printCharts);
-
-const printScheduleBtn = document.getElementById('printScheduleBtn');
-printScheduleBtn.addEventListener('click', printAmortizationSchedule);
 
 function printCharts() {
     calculateMortgage();
