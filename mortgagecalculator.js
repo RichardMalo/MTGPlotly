@@ -854,13 +854,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const modeSwitch = document.getElementById('mode-switch');
     const body = document.body;
 
+    // Immediately set the mode when the page loads
+    if (modeSwitch.checked) {
+        body.classList.add('dark-mode');
+    } else {
+        body.classList.remove('dark-mode');
+    }
+
     modeSwitch.addEventListener('change', () => {
         if (modeSwitch.checked) {
             body.classList.add('dark-mode');
         } else {
             body.classList.remove('dark-mode');
         }
-        calculateMortgage();
+        calculateMortgage(); // Recalculate the mortgage to update chart styles
     });
 
     window.addEventListener('resize', function () {
