@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Advanced Mortgage Calculator</title>
+    <title>Mortgage Calculator</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
@@ -12,12 +12,12 @@
         <div class="mode-toggle">
             <label for="mode-switch">Dark Mode</label>
             <label class="switch">
-                <input type="checkbox" id="mode-switch">
+                <input type="checkbox" id="mode-switch" checked>
                 <span class="slider"></span>
             </label>
         </div>
 
-        <h1>Advanced Visual Mortgage Calculator</h1>
+        <h1>Mortgage Calculator</h1>
 
         <!-- Mortgage Calculator Form -->
         <div id="form-container">
@@ -51,7 +51,7 @@
                     </div>
                     <div class="input-group">
                         <label for="firstPaymentDate">First Payment Date (Optional):</label>
-                        <input type="date" id="firstPaymentDate" name="firstPaymentDate">
+                        <input type="date" id="firstPaymentDate" name="firstPaymentDate" value="2024-10-01">
                     </div>
                 </div>
 
