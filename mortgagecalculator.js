@@ -1,5 +1,6 @@
-// mortgagecalculator.js
+/* mortgagecalculator.js */
 
+// Layout configurations for Plotly charts
 const lightLayout = {
     plot_bgcolor: 'white',
     paper_bgcolor: 'white',
@@ -42,9 +43,14 @@ const darkLayout = {
     },
 };
 
+/**
+ * Calculates the mortgage based on user inputs and updates the UI accordingly.
+ * @param {Event} event - The form submission event.
+ */
 function calculateMortgage(event) {
     if (event) event.preventDefault();
 
+    // Retrieve and parse user inputs
     const principal = parseFloat(document.getElementById("principal").value);
     const amortization = parseFloat(document.getElementById("amortization").value);
     const term = parseFloat(document.getElementById("term").value);
@@ -52,6 +58,7 @@ function calculateMortgage(event) {
     const extraPayment = parseFloat(document.getElementById("extraPayment").value);
     const firstPaymentDate = document.getElementById("firstPaymentDate").value;
 
+    // Validate inputs
     if (isNaN(principal) || isNaN(amortization) || isNaN(term) || isNaN(interestRate) || isNaN(extraPayment)) {
         alert("Please enter valid numbers for all fields.");
         return;
@@ -60,34 +67,53 @@ function calculateMortgage(event) {
     const monthlyRate = interestRate / 12;
     const numPayments = Math.round(amortization * 12);
 
+    // Calculate the standard mortgage payment
     const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
         (Math.pow(1 + monthlyRate, numPayments) - 1);
 
+    // Display the Monthly Payment in the Circle
+    const monthlyPaymentFormatted = `$${formatNumber(mortgagePayment.toFixed(2))}`;
+    const monthlyPaymentCircle = document.getElementById("monthlyPaymentCircle");
+    monthlyPaymentCircle.textContent = monthlyPaymentFormatted;
+
+    // Optional: Trigger fade-in effect for the monthly payment circle
+    monthlyPaymentCircle.classList.remove('visible'); // Reset visibility
+    void monthlyPaymentCircle.offsetWidth; // Trigger reflow
+    monthlyPaymentCircle.classList.add('visible'); // Fade in
+
+    // Compute amortization schedule with extra payments
     const scheduleWithExtraTotal = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extraPayment, numPayments);
 
+    // Determine current theme for chart styling
     const isDarkMode = document.body.classList.contains('dark-mode');
     const currentLayout = isDarkMode ? darkLayout : lightLayout;
 
+    // Plot various charts based on the schedule
     plotPaymentBreakdown(scheduleWithExtraTotal, currentLayout);
     plotCumulativeChart(scheduleWithExtraTotal, currentLayout);
     plotEquityBuildUp(scheduleWithExtraTotal, principal, currentLayout);
 
     let scheduleWithoutExtraTotal = null;
     if (extraPayment > 0) {
+        // Compute amortization schedule without extra payments
         scheduleWithoutExtraTotal = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, 0, numPayments);
 
+        // Calculate total interest paid in both scenarios
         const totalInterestPaidWithoutExtraTotal = scheduleWithoutExtraTotal.reduce((sum, p) => sum + p.interestPayment, 0);
         const totalInterestPaidWithExtraTotal = scheduleWithExtraTotal.reduce((sum, p) => sum + p.interestPayment, 0);
 
         const extraSavedTotal = totalInterestPaidWithoutExtraTotal - totalInterestPaidWithExtraTotal;
 
-        document.getElementById("extraSavedTotal").value = extraSavedTotal.toFixed(2);
+        // Update UI with interest saved
+        document.getElementById("extraSavedTotal").value = `$${formatNumber(extraSavedTotal.toFixed(2))}`;
 
+        // Calculate loan term reductions
         const loanPaidOffInYears = (scheduleWithExtraTotal.length / 12).toFixed(2);
         const totalLoanYears = (numPayments / 12).toFixed(2);
-        document.getElementById("paidOffIn").value = loanPaidOffInYears;
-        document.getElementById("outOf").value = totalLoanYears;
+        document.getElementById("paidOffIn").value = `${loanPaidOffInYears} years`;
+        document.getElementById("outOf").value = `${totalLoanYears} years`;
 
+        // Plot comparison charts
         plotRemainingBalanceComparison(scheduleWithoutExtraTotal, scheduleWithExtraTotal, currentLayout);
         plotTotalInterestComparison(totalInterestPaidWithoutExtraTotal, totalInterestPaidWithExtraTotal, currentLayout);
         plotLoanTermComparison(scheduleWithoutExtraTotal.length, scheduleWithExtraTotal.length, currentLayout);
@@ -95,24 +121,38 @@ function calculateMortgage(event) {
         plotTotalPaymentsComparison(scheduleWithoutExtraTotal, scheduleWithExtraTotal, principal, currentLayout);
         plotEquityComparisonOverTime(scheduleWithoutExtraTotal, scheduleWithExtraTotal, principal, currentLayout);
 
+        // Show comparison charts
         showComparisonCharts(true);
     } else {
+        // Hide comparison charts if no extra payment
         clearComparisonCharts();
         showComparisonCharts(false);
 
-        document.getElementById("extraSavedTotal").value = "0.00";
-        document.getElementById("paidOffIn").value = (numPayments / 12).toFixed(2);
-        document.getElementById("outOf").value = (numPayments / 12).toFixed(2);
+        // Reset UI fields related to extra payments
+        document.getElementById("extraSavedTotal").value = "$0.00";
+        document.getElementById("paidOffIn").value = `${(numPayments / 12).toFixed(2)} years`;
+        document.getElementById("outOf").value = `${(numPayments / 12).toFixed(2)} years`;
     }
 
+    // Plot additional charts
     plotInterestPrincipalComponents(scheduleWithExtraTotal, currentLayout);
     plotAnnualPaymentSummary(scheduleWithExtraTotal, currentLayout);
     plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, currentLayout);
     plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPayments, currentLayout);
 
+    // Generate amortization table
     createAmortizationTable(scheduleWithExtraTotal, mortgagePayment, extraPayment, firstPaymentDate);
 }
 
+/**
+ * Computes the amortization schedule.
+ * @param {number} balance - The remaining balance.
+ * @param {number} monthlyRate - The monthly interest rate.
+ * @param {number} mortgagePayment - The standard mortgage payment.
+ * @param {number} extraPayment - The extra monthly payment.
+ * @param {number} numPayments - Total number of payments.
+ * @returns {Array} The amortization schedule.
+ */
 function computeAmortizationSchedule(balance, monthlyRate, mortgagePayment, extraPayment, numPayments) {
     const schedule = [];
     let remainingBalance = balance;
@@ -142,6 +182,7 @@ function computeAmortizationSchedule(balance, monthlyRate, mortgagePayment, extr
             totalPrincipalPayment,
             remainingBalance: remainingBalance < 0 ? 0 : remainingBalance,
         });
+
         if (remainingBalance <= 0) {
             break;
         }
@@ -149,6 +190,11 @@ function computeAmortizationSchedule(balance, monthlyRate, mortgagePayment, extr
     return schedule;
 }
 
+/**
+ * Plots the mortgage payment breakdown using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotPaymentBreakdown(schedule, layout) {
     const data = schedule.map(p => ({
         x: p.paymentYear,
@@ -162,7 +208,7 @@ function plotPaymentBreakdown(schedule, layout) {
         y: data.map((d) => d.y[2]),
         name: 'Extra Payment',
         type: 'bar',
-        text: data.map((d) => `$${d.y[2].toFixed(2)}`),
+        text: data.map((d) => `$${formatNumber(d.y[2].toFixed(2))}`),
         textposition: 'auto',
         marker: { color: '#2a9d8f' }
     };
@@ -172,7 +218,7 @@ function plotPaymentBreakdown(schedule, layout) {
         y: data.map((d) => d.y[0]),
         name: 'Principal',
         type: 'bar',
-        text: data.map((d) => `$${d.y[0].toFixed(2)}`),
+        text: data.map((d) => `$${formatNumber(d.y[0].toFixed(2))}`),
         textposition: 'auto',
         marker: { color: '#457b9d' }
     };
@@ -182,7 +228,7 @@ function plotPaymentBreakdown(schedule, layout) {
         y: data.map((d) => d.y[1]),
         name: 'Interest',
         type: 'bar',
-        text: data.map((d) => `$${d.y[1].toFixed(2)}`),
+        text: data.map((d) => `$${formatNumber(d.y[1].toFixed(2))}`),
         textposition: 'auto',
         marker: { color: '#e63946' }
     };
@@ -207,6 +253,11 @@ function plotPaymentBreakdown(schedule, layout) {
     Plotly.newPlot('chart', [traceInterest, tracePrincipal, traceExtra], chartLayout, config);
 }
 
+/**
+ * Plots the cumulative payments over time using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotCumulativeChart(schedule, layout) {
     const cumulativePayments = [];
     let totalPayment = 0;
@@ -257,6 +308,12 @@ function plotCumulativeChart(schedule, layout) {
     Plotly.newPlot('chart2', [trace], chartLayout, config);
 }
 
+/**
+ * Plots the equity build-up over time using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {number} principal - The initial principal amount.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotEquityBuildUp(schedule, principal, layout) {
     const equityData = schedule.map(p => ({
         x: p.paymentYear.toFixed(2),
@@ -304,6 +361,11 @@ function plotEquityBuildUp(schedule, principal, layout) {
     Plotly.newPlot('chart4', [trace], chartLayout, config);
 }
 
+/**
+ * Plots the interest vs principal components over time using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotInterestPrincipalComponents(schedule, layout) {
     const xValues = schedule.map(p => parseFloat(p.paymentYear.toFixed(2)));
     const principalPayments = schedule.map(p => p.principalPayment + p.extraPayment);
@@ -358,6 +420,11 @@ function plotInterestPrincipalComponents(schedule, layout) {
     Plotly.newPlot('chart6', [traceInterest, tracePrincipal], chartLayout, config);
 }
 
+/**
+ * Plots the annual payment summary using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotAnnualPaymentSummary(schedule, layout) {
     const annualData = {};
 
@@ -382,7 +449,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
 
     const tracePrincipal = {
         x: years,
-        y: principalPayments.map(v => v.toFixed(2)),
+        y: principalPayments.map(v => parseFloat(v.toFixed(2))),
         name: 'Principal',
         type: 'bar',
         marker: { color: '#457b9d' }
@@ -390,7 +457,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
 
     const traceInterest = {
         x: years,
-        y: interestPayments.map(v => v.toFixed(2)),
+        y: interestPayments.map(v => parseFloat(v.toFixed(2))),
         name: 'Interest',
         type: 'bar',
         marker: { color: '#e63946' }
@@ -398,7 +465,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
 
     const traceExtra = {
         x: years,
-        y: extraPayments.map(v => v.toFixed(2)),
+        y: extraPayments.map(v => parseFloat(v.toFixed(2))),
         name: 'Extra Payment',
         type: 'bar',
         marker: { color: '#2a9d8f' }
@@ -422,12 +489,18 @@ function plotAnnualPaymentSummary(schedule, layout) {
     Plotly.newPlot('chart11', [traceInterest, tracePrincipal, traceExtra], chartLayout);
 }
 
+/**
+ * Plots the remaining balance comparison between scenarios using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra, layout) {
     const xValuesWithoutExtra = scheduleWithoutExtra.map((d) => parseFloat(d.paymentYear.toFixed(2)));
-    const yValuesWithoutExtra = scheduleWithoutExtra.map((d) => d.remainingBalance.toFixed(2));
+    const yValuesWithoutExtra = scheduleWithoutExtra.map((d) => parseFloat(d.remainingBalance.toFixed(2)));
 
     const xValuesWithExtra = scheduleWithExtra.map((d) => parseFloat(d.paymentYear.toFixed(2)));
-    const yValuesWithExtra = scheduleWithExtra.map((d) => d.remainingBalance.toFixed(2));
+    const yValuesWithExtra = scheduleWithExtra.map((d) => parseFloat(d.remainingBalance.toFixed(2)));
 
     const trace1 = {
         x: xValuesWithoutExtra,
@@ -467,7 +540,7 @@ function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra,
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
-            title: 'Remaining Balance',
+            title: 'Remaining Balance ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
@@ -479,14 +552,20 @@ function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra,
     Plotly.newPlot('chart3', [trace1, trace2], chartLayout, config);
 }
 
+/**
+ * Plots the total interest paid comparison using Plotly.
+ * @param {number} totalInterestWithoutExtra - Total interest without extra payments.
+ * @param {number} totalInterestWithExtra - Total interest with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWithExtra, layout) {
     const data = [
         {
             x: ['Without Extra Payments', 'With Extra Payments'],
-            y: [totalInterestWithoutExtra.toFixed(2), totalInterestWithExtra.toFixed(2)],
+            y: [parseFloat(totalInterestWithoutExtra.toFixed(2)), parseFloat(totalInterestWithExtra.toFixed(2))],
             type: 'bar',
             marker: { color: ['#e63946', '#2a9d8f'] },
-            text: [`$${totalInterestWithoutExtra.toFixed(2)}`, `$${totalInterestWithExtra.toFixed(2)}`],
+            text: [`$${formatNumber(totalInterestWithoutExtra.toFixed(2))}`, `$${formatNumber(totalInterestWithExtra.toFixed(2))}`],
             textposition: 'auto'
         }
     ];
@@ -497,17 +576,21 @@ function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWit
             title: 'Scenario',
         }),
         yaxis: Object.assign({}, layout.yaxis, {
-            title: 'Total Interest Paid',
+            title: 'Total Interest Paid ($)',
         }),
         width: window.innerWidth * 0.97,
         height: 400,
     });
 
-    const config = { responsive: true };
-
-    Plotly.newPlot('chart7', data, chartLayout, config);
+    Plotly.newPlot('chart7', data, chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the loan term comparison using Plotly.
+ * @param {number} termWithoutExtraPayments - Number of payments without extra payments.
+ * @param {number} termWithExtraPayments - Number of payments with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments, layout) {
     const termWithoutExtraYears = (termWithoutExtraPayments / 12).toFixed(2);
     const termWithExtraYears = (termWithExtraPayments / 12).toFixed(2);
@@ -515,7 +598,7 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
     const data = [
         {
             x: ['Without Extra Payments', 'With Extra Payments'],
-            y: [termWithoutExtraYears, termWithExtraYears],
+            y: [parseFloat(termWithoutExtraYears), parseFloat(termWithExtraYears)],
             type: 'bar',
             marker: { color: ['#e63946', '#2a9d8f'] },
             text: [`${termWithoutExtraYears} years`, `${termWithExtraYears} years`],
@@ -535,11 +618,15 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
         height: 400,
     });
 
-    const config = { responsive: true };
-
-    Plotly.newPlot('chart8', data, chartLayout, config);
+    Plotly.newPlot('chart8', data, chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the cumulative interest savings over time using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, layout) {
     const xValues = [];
     const interestSavings = [];
@@ -564,8 +651,8 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
     const yPadding = yEnd * 0.05;
 
     const trace = {
-        x: xValues.map(x => x.toFixed(2)),
-        y: interestSavings.map(s => s.toFixed(2)),
+        x: xValues.map(x => parseFloat(x.toFixed(2))),
+        y: interestSavings.map(s => parseFloat(s.toFixed(2))),
         name: 'Interest Savings',
         type: 'scatter',
         mode: 'lines',
@@ -582,16 +669,23 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
-            title: 'Interest Savings',
+            title: 'Interest Savings ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
         width: window.innerWidth * 0.97,
         height: 400,
     });
 
-    Plotly.newPlot('chart9', [trace], chartLayout);
+    Plotly.newPlot('chart9', [trace], chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the total payments comparison using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {number} principal - The initial principal amount.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, principal, layout) {
     const totalPaidWithoutExtra = scheduleWithoutExtra.reduce((sum, p) => sum + p.interestPayment + p.principalPayment, 0);
     const totalPaidWithExtra = scheduleWithExtra.reduce((sum, p) => sum + p.interestPayment + p.principalPayment + p.extraPayment, 0);
@@ -599,10 +693,10 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
     const data = [
         {
             x: ['Without Extra Payments', 'With Extra Payments'],
-            y: [totalPaidWithoutExtra.toFixed(2), totalPaidWithExtra.toFixed(2)],
+            y: [parseFloat(totalPaidWithoutExtra.toFixed(2)), parseFloat(totalPaidWithExtra.toFixed(2))],
             type: 'bar',
             marker: { color: ['#e63946', '#2a9d8f'] },
-            text: [`$${totalPaidWithoutExtra.toFixed(2)}`, `$${totalPaidWithExtra.toFixed(2)}`],
+            text: [`$${formatNumber(totalPaidWithoutExtra.toFixed(2))}`, `$${formatNumber(totalPaidWithExtra.toFixed(2))}`],
             textposition: 'auto'
         }
     ];
@@ -613,21 +707,28 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
             title: 'Scenario',
         }),
         yaxis: Object.assign({}, layout.yaxis, {
-            title: 'Total Amount Paid',
+            title: 'Total Amount Paid ($)',
         }),
         width: window.innerWidth * 0.97,
         height: 400,
     });
 
-    Plotly.newPlot('chart10', data, chartLayout);
+    Plotly.newPlot('chart10', data, chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the equity comparison over time using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {number} principal - The initial principal amount.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, principal, layout) {
     const xValuesWithoutExtra = scheduleWithoutExtra.map(p => parseFloat(p.paymentYear.toFixed(2)));
-    const equityWithoutExtra = scheduleWithoutExtra.map(p => (principal - p.remainingBalance).toFixed(2));
+    const equityWithoutExtra = scheduleWithoutExtra.map(p => parseFloat((principal - p.remainingBalance).toFixed(2)));
 
     const xValuesWithExtra = scheduleWithExtra.map(p => parseFloat(p.paymentYear.toFixed(2)));
-    const equityWithExtra = scheduleWithExtra.map(p => (principal - p.remainingBalance).toFixed(2));
+    const equityWithExtra = scheduleWithExtra.map(p => parseFloat((principal - p.remainingBalance).toFixed(2)));
 
     const traceWithoutExtra = {
         x: xValuesWithoutExtra,
@@ -674,9 +775,305 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
         height: 400,
     });
 
-    Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout);
+    Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the remaining balance over time comparison using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra, layout) {
+    const xValuesWithoutExtra = scheduleWithoutExtra.map((d) => parseFloat(d.paymentYear.toFixed(2)));
+    const yValuesWithoutExtra = scheduleWithoutExtra.map((d) => parseFloat(d.remainingBalance.toFixed(2)));
+
+    const xValuesWithExtra = scheduleWithExtra.map((d) => parseFloat(d.paymentYear.toFixed(2)));
+    const yValuesWithExtra = scheduleWithExtra.map((d) => parseFloat(d.remainingBalance.toFixed(2)));
+
+    const trace1 = {
+        x: xValuesWithoutExtra,
+        y: yValuesWithoutExtra,
+        name: 'Without Extra Payments',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#e63946' }
+    };
+
+    const trace2 = {
+        x: xValuesWithExtra,
+        y: yValuesWithExtra,
+        name: 'With Extra Payments',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#2a9d8f' }
+    };
+
+    const allXValues = xValuesWithoutExtra.concat(xValuesWithExtra);
+    const allYValues = yValuesWithoutExtra.concat(yValuesWithExtra).map(y => parseFloat(y));
+
+    const xStart = 0;
+    const xEnd = Math.max(...allXValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...allYValues);
+    const yPadding = yEnd * 0.05;
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Remaining Balance Over Time',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Year',
+            tickmode: 'linear',
+            dtick: 1,
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
+            zeroline: false
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Remaining Balance ($)',
+            range: [yStart - yPadding, yEnd + yPadding]
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    const config = { responsive: true };
+
+    Plotly.newPlot('chart3', [trace1, trace2], chartLayout, config);
+}
+
+/**
+ * Plots the total interest paid comparison using Plotly.
+ * @param {number} totalInterestWithoutExtra - Total interest without extra payments.
+ * @param {number} totalInterestWithExtra - Total interest with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWithExtra, layout) {
+    const data = [
+        {
+            x: ['Without Extra Payments', 'With Extra Payments'],
+            y: [parseFloat(totalInterestWithoutExtra.toFixed(2)), parseFloat(totalInterestWithExtra.toFixed(2))],
+            type: 'bar',
+            marker: { color: ['#e63946', '#2a9d8f'] },
+            text: [`$${formatNumber(totalInterestWithoutExtra.toFixed(2))}`, `$${formatNumber(totalInterestWithExtra.toFixed(2))}`],
+            textposition: 'auto'
+        }
+    ];
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Total Interest Paid Comparison',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Scenario',
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Total Interest Paid ($)',
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart7', data, chartLayout, { responsive: true });
+}
+
+/**
+ * Plots the loan term comparison using Plotly.
+ * @param {number} termWithoutExtraPayments - Number of payments without extra payments.
+ * @param {number} termWithExtraPayments - Number of payments with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments, layout) {
+    const termWithoutExtraYears = (termWithoutExtraPayments / 12).toFixed(2);
+    const termWithExtraYears = (termWithExtraPayments / 12).toFixed(2);
+
+    const data = [
+        {
+            x: ['Without Extra Payments', 'With Extra Payments'],
+            y: [parseFloat(termWithoutExtraYears), parseFloat(termWithExtraYears)],
+            type: 'bar',
+            marker: { color: ['#e63946', '#2a9d8f'] },
+            text: [`${termWithoutExtraYears} years`, `${termWithExtraYears} years`],
+            textposition: 'auto'
+        }
+    ];
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Loan Term Comparison',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Scenario',
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Loan Term (Years)',
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart8', data, chartLayout, { responsive: true });
+}
+
+/**
+ * Plots the cumulative interest savings over time using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, layout) {
+    const xValues = [];
+    const interestSavings = [];
+    let cumulativeInterestWithoutExtra = 0;
+    let cumulativeInterestWithExtra = 0;
+
+    const maxLength = Math.max(scheduleWithoutExtra.length, scheduleWithExtra.length);
+
+    for (let i = 0; i < maxLength; i++) {
+        cumulativeInterestWithoutExtra += scheduleWithoutExtra[i] ? scheduleWithoutExtra[i].interestPayment : 0;
+        cumulativeInterestWithExtra += scheduleWithExtra[i] ? scheduleWithExtra[i].interestPayment : 0;
+        xValues.push((i + 1) / 12);
+        const savings = cumulativeInterestWithoutExtra - cumulativeInterestWithExtra;
+        interestSavings.push(savings);
+    }
+
+    const xStart = 0;
+    const xEnd = xValues[xValues.length - 1];
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...interestSavings);
+    const yPadding = yEnd * 0.05;
+
+    const trace = {
+        x: xValues.map(x => parseFloat(x.toFixed(2))),
+        y: interestSavings.map(s => parseFloat(s.toFixed(2))),
+        name: 'Interest Savings',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#2a9d8f' },
+    };
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Cumulative Interest Savings Over Time',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Year',
+            tickmode: 'linear',
+            dtick: 1,
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
+            zeroline: false
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Interest Savings ($)',
+            range: [yStart - yPadding, yEnd + yPadding]
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart9', [trace], chartLayout, { responsive: true });
+}
+
+/**
+ * Plots the total payments comparison using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {number} principal - The initial principal amount.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, principal, layout) {
+    const totalPaidWithoutExtra = scheduleWithoutExtra.reduce((sum, p) => sum + p.interestPayment + p.principalPayment, 0);
+    const totalPaidWithExtra = scheduleWithExtra.reduce((sum, p) => sum + p.interestPayment + p.principalPayment + p.extraPayment, 0);
+
+    const data = [
+        {
+            x: ['Without Extra Payments', 'With Extra Payments'],
+            y: [parseFloat(totalPaidWithoutExtra.toFixed(2)), parseFloat(totalPaidWithExtra.toFixed(2))],
+            type: 'bar',
+            marker: { color: ['#e63946', '#2a9d8f'] },
+            text: [`$${formatNumber(totalPaidWithoutExtra.toFixed(2))}`, `$${formatNumber(totalPaidWithExtra.toFixed(2))}`],
+            textposition: 'auto'
+        }
+    ];
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Total Payments Comparison',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Scenario',
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Total Amount Paid ($)',
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart10', data, chartLayout, { responsive: true });
+}
+
+/**
+ * Plots the equity comparison over time using Plotly.
+ * @param {Array} scheduleWithoutExtra - Schedule without extra payments.
+ * @param {Array} scheduleWithExtra - Schedule with extra payments.
+ * @param {number} principal - The initial principal amount.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, principal, layout) {
+    const xValuesWithoutExtra = scheduleWithoutExtra.map(p => parseFloat(p.paymentYear.toFixed(2)));
+    const equityWithoutExtra = scheduleWithoutExtra.map(p => parseFloat((principal - p.remainingBalance).toFixed(2)));
+
+    const xValuesWithExtra = scheduleWithExtra.map(p => parseFloat(p.paymentYear.toFixed(2)));
+    const equityWithExtra = scheduleWithExtra.map(p => parseFloat((principal - p.remainingBalance).toFixed(2)));
+
+    const traceWithoutExtra = {
+        x: xValuesWithoutExtra,
+        y: equityWithoutExtra,
+        name: 'Without Extra Payments',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#e63946' }
+    };
+
+    const traceWithExtra = {
+        x: xValuesWithExtra,
+        y: equityWithExtra,
+        name: 'With Extra Payments',
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#2a9d8f' }
+    };
+
+    const allXValues = xValuesWithoutExtra.concat(xValuesWithExtra);
+    const allYValues = equityWithoutExtra.concat(equityWithExtra).map(y => parseFloat(y));
+
+    const xStart = 0;
+    const xEnd = Math.max(...allXValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...allYValues);
+    const yPadding = yEnd * 0.05;
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Cumulative Equity Over Time',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Year',
+            tickmode: 'linear',
+            dtick: 1,
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
+            zeroline: false
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Cumulative Equity ($)',
+            range: [yStart - yPadding, yEnd + yPadding]
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout, { responsive: true });
+}
+
+/**
+ * Plots the extra payment effect on loan term using Plotly.
+ * @param {number} principal - The initial principal amount.
+ * @param {number} monthlyRate - The monthly interest rate.
+ * @param {number} numPayments - Total number of payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, layout) {
     const extraPayments = [];
     const loanTerms = [];
@@ -687,7 +1084,7 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
         const loanTermYears = (schedule.length / 12).toFixed(2);
 
         extraPayments.push(extra);
-        loanTerms.push(loanTermYears);
+        loanTerms.push(parseFloat(loanTermYears));
     }
 
     const xStart = 0;
@@ -723,9 +1120,16 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
         height: 400,
     });
 
-    Plotly.newPlot('chart12', [trace], chartLayout);
+    Plotly.newPlot('chart12', [trace], chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the extra payment effect on total interest paid using Plotly.
+ * @param {number} principal - The initial principal amount.
+ * @param {number} monthlyRate - The monthly interest rate.
+ * @param {number} numPayments - Total number of payments.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
 function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPayments, layout) {
     const extraPayments = [];
     const totalInterests = [];
@@ -734,7 +1138,7 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
         const mortgagePayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
             (Math.pow(1 + monthlyRate, numPayments) - 1);
         const schedule = computeAmortizationSchedule(principal, monthlyRate, mortgagePayment, extra, numPayments);
-        const totalInterest = schedule.reduce((sum, p) => sum + p.interestPayment, 0).toFixed(2);
+        const totalInterest = parseFloat(schedule.reduce((sum, p) => sum + p.interestPayment, 0).toFixed(2));
 
         extraPayments.push(extra);
         totalInterests.push(totalInterest);
@@ -773,9 +1177,73 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
         height: 400,
     });
 
-    Plotly.newPlot('chart13', [trace], chartLayout);
+    Plotly.newPlot('chart13', [trace], chartLayout, { responsive: true });
 }
 
+/**
+ * Plots the interest vs principal components over time using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotInterestPrincipalComponents(schedule, layout) {
+    const xValues = schedule.map(p => parseFloat(p.paymentYear.toFixed(2)));
+    const principalPayments = schedule.map(p => p.principalPayment + p.extraPayment);
+    const interestPayments = schedule.map(p => p.interestPayment);
+
+    const tracePrincipal = {
+        x: xValues,
+        y: principalPayments,
+        name: 'Principal + Extra Payment',
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tonexty',
+        line: { color: '#457b9d' }
+    };
+
+    const traceInterest = {
+        x: xValues,
+        y: interestPayments,
+        name: 'Interest',
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tonexty',
+        line: { color: '#e63946' }
+    };
+
+    const xStart = 0;
+    const xEnd = Math.max(...xValues);
+    const xPadding = (xEnd - xStart) * 0.05;
+    const yStart = 0;
+    const yEnd = Math.max(...principalPayments, ...interestPayments);
+    const yPadding = yEnd * 0.05;
+
+    const chartLayout = Object.assign({}, layout, {
+        title: 'Interest vs Principal Components Over Time',
+        xaxis: Object.assign({}, layout.xaxis, {
+            title: 'Year',
+            tickmode: 'linear',
+            dtick: 1,
+            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
+            zeroline: false
+        }),
+        yaxis: Object.assign({}, layout.yaxis, {
+            title: 'Payment Amount ($)',
+            range: [yStart - yPadding, yEnd + yPadding]
+        }),
+        width: window.innerWidth * 0.97,
+        height: 400,
+    });
+
+    Plotly.newPlot('chart6', [traceInterest, tracePrincipal], chartLayout, { responsive: true });
+}
+
+/**
+ * Creates the amortization table and inserts it into the DOM.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {number} mortgagePayment - The standard mortgage payment.
+ * @param {number} extraPayment - The extra monthly payment.
+ * @param {string} firstPaymentDate - The first payment date (optional).
+ */
 function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstPaymentDate) {
     const tableBody = document.querySelector("#amortization-table tbody");
     tableBody.innerHTML = '';
@@ -788,7 +1256,7 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
     if (firstPaymentDate) {
         const dateParts = firstPaymentDate.split('-');
         const year = parseInt(dateParts[0]);
-        const month = parseInt(dateParts[1]) - 1;
+        const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-based
         const day = parseInt(dateParts[2]);
         currentDate = new Date(year, month, day);
     }
@@ -810,11 +1278,11 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
         row.appendChild(paymentCell);
 
         row.innerHTML += `
-            <td>$${(p.principalPayment + p.interestPayment + p.extraPayment).toFixed(2)}</td>
-            <td>$${p.extraPayment.toFixed(2)}</td>
-            <td>$${p.principalPayment.toFixed(2)}</td>
-            <td>$${p.interestPayment.toFixed(2)}</td>
-            <td>$${p.remainingBalance.toFixed(2)}</td>
+            <td>$${formatNumber((p.principalPayment + p.interestPayment + p.extraPayment).toFixed(2))}</td>
+            <td>$${formatNumber(p.extraPayment.toFixed(2))}</td>
+            <td>$${formatNumber(p.principalPayment.toFixed(2))}</td>
+            <td>$${formatNumber(p.interestPayment.toFixed(2))}</td>
+            <td>$${formatNumber(p.remainingBalance.toFixed(2))}</td>
         `;
 
         tableBody.appendChild(row);
@@ -823,14 +1291,26 @@ function createAmortizationTable(schedule, mortgagePayment, extraPayment, firstP
     const summaryRow = document.createElement('tr');
     summaryRow.innerHTML = `
         <td colspan="2"><strong>Totals</strong></td>
-        <td><strong>$${totalExtraPayments.toFixed(2)}</strong></td>
-        <td><strong>$${totalPrincipal.toFixed(2)}</strong></td>
-        <td><strong>$${totalInterest.toFixed(2)}</strong></td>
+        <td><strong>$${formatNumber(totalExtraPayments.toFixed(2))}</strong></td>
+        <td><strong>$${formatNumber(totalPrincipal.toFixed(2))}</strong></td>
+        <td><strong>$${formatNumber(totalInterest.toFixed(2))}</strong></td>
         <td><strong>N/A</strong></td>
     `;
     tableBody.appendChild(summaryRow);
 }
 
+/**
+ * Formats a number with commas for thousands separators.
+ * @param {string} numberStr - The number as a string.
+ * @returns {string} The formatted number string.
+ */
+function formatNumber(numberStr) {
+    return Number(numberStr).toLocaleString();
+}
+
+/**
+ * Clears the first payment date and recalculates the mortgage.
+ */
 function clearDate() {
     const firstPaymentDateInput = document.getElementById("firstPaymentDate");
     firstPaymentDateInput.value = "";
@@ -838,6 +1318,11 @@ function clearDate() {
     calculateMortgage(new Event('submit'));
 }
 
+/**
+ * Formats a Date object into a readable string (e.g., Oct 2024).
+ * @param {Date} date - The Date object.
+ * @returns {string} The formatted date string.
+ */
 function formatDate(date) {
     const options = { year: 'numeric', month: 'short' };
     return date.toLocaleDateString('en-US', options);
@@ -854,13 +1339,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const modeSwitch = document.getElementById('mode-switch');
     const body = document.body;
 
-    // Immediately set the mode when the page loads
+    // Set the initial theme based on the mode switch
     if (modeSwitch.checked) {
         body.classList.add('dark-mode');
     } else {
         body.classList.remove('dark-mode');
     }
 
+    // Toggle theme and recalculate mortgage on mode switch change
     modeSwitch.addEventListener('change', () => {
         if (modeSwitch.checked) {
             body.classList.add('dark-mode');
@@ -870,6 +1356,7 @@ document.addEventListener('DOMContentLoaded', function () {
         calculateMortgage(); // Recalculate the mortgage to update chart styles
     });
 
+    // Adjust chart layouts on window resize
     window.addEventListener('resize', function () {
         const isDarkMode = document.body.classList.contains('dark-mode');
         const currentLayout = isDarkMode ? darkLayout : lightLayout;
@@ -898,6 +1385,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Print buttons
     const printChartsBtn = document.getElementById('printChartsBtn');
     printChartsBtn.addEventListener('click', printCharts);
 
@@ -905,6 +1393,18 @@ document.addEventListener('DOMContentLoaded', function () {
     printScheduleBtn.addEventListener('click', printAmortizationSchedule);
 });
 
+/**
+ * Formats a number with commas and decimal places.
+ * @param {string} numberStr - The number as a string.
+ * @returns {string} The formatted number string.
+ */
+function formatNumberWithCommas(numberStr) {
+    return Number(numberStr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/**
+ * Triggers printing of the charts.
+ */
 function printCharts() {
     calculateMortgage();
 
@@ -913,6 +1413,9 @@ function printCharts() {
     window.print();
 }
 
+/**
+ * Triggers printing of the amortization schedule.
+ */
 function printAmortizationSchedule() {
     calculateMortgage();
 
@@ -921,11 +1424,16 @@ function printAmortizationSchedule() {
     window.print();
 }
 
+// Remove print-related classes after printing
 window.addEventListener('afterprint', () => {
     document.body.classList.remove('print-charts');
     document.body.classList.remove('print-schedule');
 });
 
+/**
+ * Shows or hides the comparison charts.
+ * @param {boolean} show - Whether to show the comparison charts.
+ */
 function showComparisonCharts(show) {
     const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
     comparisonChartIds.forEach(chartId => {
@@ -936,9 +1444,21 @@ function showComparisonCharts(show) {
     });
 }
 
+/**
+ * Clears all comparison charts by purging them.
+ */
 function clearComparisonCharts() {
     const comparisonChartIds = ['chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'];
     comparisonChartIds.forEach(chartId => {
         Plotly.purge(chartId);
     });
+}
+
+/**
+ * Formats a number with commas and two decimal places.
+ * @param {string} numberStr - The number as a string.
+ * @returns {string} The formatted number string.
+ */
+function formatNumber(numberStr) {
+    return Number(numberStr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

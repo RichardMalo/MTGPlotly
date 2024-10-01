@@ -20,8 +20,8 @@
 
         <h1>Mortgage Calculator</h1>
 
-        <!-- Mortgage Calculator Form -->
-        <div id="form-container">
+        <!-- Mortgage Calculator Form and Monthly Payment Circle -->
+        <div id="form-container" class="form-with-circle">
             <form id="mortgageForm">
                 <div class="input-group-row">
                     <div class="input-group">
@@ -56,11 +56,18 @@
                     </div>
                 </div>
 
-                <div class="input-group full-width">
-                    <button type="submit">Calculate Mortgage</button>
-                    <button type="button" id="clearDateBtn">Clear Date</button>
+                <div class="input-group-row">
+                    <div class="input-group full-width">
+                        <button type="submit">Calculate Mortgage</button>
+                        <button type="button" id="clearDateBtn">Clear Date</button>
+                    </div>
                 </div>
             </form>
+
+            <!-- New Circle for Monthly Payment -->
+            <div class="monthly-payment-circle" id="monthlyPaymentCircle">
+                $0.00
+            </div>
         </div>
 
         <!-- Display Calculated Results -->
