@@ -1,435 +1,378 @@
 /* style.css */
 
-:root {
-  --bg-color: #f7f7f7;
-  --text-color: #333;
-  --form-bg: #fff;
-  --form-shadow: rgba(0, 0, 0, 0.1);
-  --input-border: #ddd;
-  --button-bg: #3498db;
-  --button-hover: #2980b9;
-  --table-header-bg: #f2f2f2;
-  --table-border: #ddd;
+/* Reset some default browser styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+/* Body Styles */
 body {
-  font-family: 'Roboto', sans-serif;
-  line-height: 1.6;
-  color: var(--text-color);
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-h1, h2, h3 {
-  color: var(--text-color);
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-#form-container {
-  margin: 0 auto 30px;
-  background-color: var(--form-bg);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px var(--form-shadow);
-}
-
-.input-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-input[type="number"],
-input[type="text"],
-input[type="date"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
-  font-size: 16px;
-  background-color: var(--form-bg);
-  color: var(--text-color);
-  box-sizing: border-box;
-}
-
-input[readonly] {
-  background-color: #e9e9e9;
-  color: var(--text-color);
-}
-
-button {
-  background-color: var(--button-bg);
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-  width: 100%;
-}
-
-button:hover {
-  background-color: var(--button-hover);
-}
-
-/* New styles for the buttons container */
-.input-group.full-width {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.input-group.full-width button {
-  flex: 1;
-  max-width: 200px;
-  padding: 12px 0;
-}
-
-.input-group-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.input-group-row .input-group {
-  flex: 1;
-  min-width: 200px;
-}
-
-#charts-container {
-  margin-top: 30px;
-}
-
-#charts-container > div {
-  margin-top: 30px;
-  width: 100%;
-  max-width: none;
-  margin-left: 0;
-  margin-right: 0;
-  /* Ensure charts are visible */
-  display: block !important;
-}
-
-#amortization-table-container {
-  margin-top: 30px;
-  background-color: var(--form-bg);
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px var(--form-shadow);
-  overflow-x: auto;
-}
-
-#amortization-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-#amortization-table th, #amortization-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--table-border);
-}
-
-#amortization-table th {
-  background-color: var(--table-header-bg);
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-.mode-toggle {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.mode-toggle label {
-  margin-right: 10px;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Dark Mode Styles */
 body.dark-mode {
-  --bg-color: #1a1a1a;
-  --text-color: #f0f0f0;
-  --form-bg: #2c2c2c;
-  --form-shadow: rgba(255, 255, 255, 0.1);
-  --input-border: #444;
-  --button-bg: #2980b9;
-  --button-hover: #3498db;
-  --table-header-bg: #333;
-  --table-border: #444;
+    background-color: #121212;
+    color: #e0e0e0;
 }
 
-body.dark-mode #form-container,
-body.dark-mode #amortization-table-container {
-  background-color: var(--form-bg);
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-body.dark-mode input[type="number"],
-body.dark-mode input[type="text"],
-body.dark-mode input[type="date"] {
-  background-color: #555;
-  color: var(--text-color);
-  border-color: var(--input-border);
+/* Dark Mode Toggle */
+.mode-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 20px;
 }
 
-body.dark-mode #results-container .input-group input {
-  background-color: #555;
-  color: var(--text-color);
-  border-color: var(--input-border);
+.mode-toggle label {
+    margin-right: 10px;
+    font-weight: bold;
 }
 
-/* Ensure that placeholder text is visible in dark mode */
-body.dark-mode ::-webkit-input-placeholder {
-  color: var(--text-color);
-  opacity: 0.7;
-}
-body.dark-mode :-ms-input-placeholder {
-  color: var(--text-color);
-  opacity: 0.7;
-}
-body.dark-mode ::-ms-input-placeholder {
-  color: var(--text-color);
-  opacity: 0.7;
-}
-body.dark-mode ::placeholder {
-  color: var(--text-color);
-  opacity: 0.7;
+/* Toggle Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
 }
 
-/* Ensure transitions apply when variables change */
-body {
-  transition: background-color 0.3s, color 0.3s;
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-#form-container,
-#amortization-table-container {
-  transition: background-color 0.3s, box-shadow 0.3s;
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
 }
 
-input[type="number"],
-input[type="text"],
-input[type="date"] {
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
 }
 
-/* Media query for mobile devices */
-@media (max-width: 768px) {
-  .input-group-row {
+input:checked + .slider {
+    background-color: #2a9d8f;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2a9d8f;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Main Heading */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+/* Form Container with Circle */
+.form-with-circle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px; /* Space between form and circle */
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+/* Mortgage Form Styles */
+#mortgageForm {
+    flex: 1;
+    min-width: 300px;
+}
+
+.input-group-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
     flex-direction: column;
-  }
+}
 
-  .input-group-row .input-group {
+.input-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #2a9d8f;
+    outline: none;
+}
+
+.full-width {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.full-width button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #2a9d8f;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.full-width button:hover {
+    background-color: #21867a;
+}
+
+#clearDateBtn {
+    background-color: #e63946;
+}
+
+#clearDateBtn:hover {
+    background-color: #c1272d;
+}
+
+/* Monthly Payment Circle (2.2x Larger) */
+.monthly-payment-circle {
+    width: 264px; /* 120px * 2.2 */
+    height: 264px; /* 120px * 2.2 */
+    border-radius: 50%;
+    background-color: #2a9d8f; /* Teal color */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.64em; /* 1.2em * 2.2 */
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* Prevent shrinking */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, width 0.3s ease, height 0.3s ease, font-size 0.3s ease;
+}
+
+.monthly-payment-circle.visible {
+    opacity: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .form-with-circle {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .monthly-payment-circle {
+        margin-top: 20px;
+        width: 220px; /* Adjusted size for smaller screens */
+        height: 220px;
+        font-size: 2.4em; /* Adjusted font size for smaller screens */
+    }
+}
+
+/* Results Container */
+#results-container {
+    margin-bottom: 40px;
+}
+
+.results-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.results-row .input-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.results-row .input-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.results-row .input-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+/* Dark Mode Adjustments */
+body.dark-mode .input-group input {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-mode .results-row .input-group input {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+body.dark-mode .monthly-payment-circle {
+    background-color: #1f7a74;
+}
+
+/* Charts Container */
+#charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+#charts-container > div {
+    flex: 1;
+    min-width: 300px;
+    max-width: 600px;
+}
+
+/* Amortization Table */
+#amortization-table-container {
+    margin-bottom: 40px;
+}
+
+#amortization-table {
     width: 100%;
-  }
-
-  #form-container, #amortization-table-container {
-    padding: 15px;
-  }
-
-  #charts-container > div {
-    margin-left: 0;
-    margin-right: 0;
-  }
+    border-collapse: collapse;
 }
 
-@media (max-width: 1200px) {
-  #form-container,
-  #amortization-table-container {
-    border-radius: 0;
-  }
+#amortization-table th, #amortization-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
 }
 
-/* Style for print buttons */
+#amortization-table th {
+    background-color: #2a9d8f;
+    color: white;
+}
+
+#amortization-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+body.dark-mode #amortization-table th {
+    background-color: #1f7a74;
+}
+
+body.dark-mode #amortization-table tr:nth-child(even) {
+    background-color: #2c2c2c;
+}
+
+body.dark-mode #amortization-table tr:nth-child(odd) {
+    background-color: #3a3a3a;
+}
+
+body.dark-mode #amortization-table td {
+    border: 1px solid #555;
+}
+
+/* Print Buttons */
 .print-buttons {
-  text-align: center;
-  margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
 }
 
 .print-buttons button {
-  margin: 10px;
-  padding: 10px 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #2a9d8f;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-/* Adjust input groups inside the results-container */
-#results-container .results-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+.print-buttons button:hover {
+    background-color: #21867a;
 }
 
-#results-container .input-group {
-  flex: 1;
-  min-width: 200px;
-}
-
-#results-container .input-group label {
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: var(--text-color);
-  width: 100%;
-}
-
-#results-container .input-group input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
-  font-size: 16px;
-  background-color: #e9e9e9;
-  color: var(--text-color);
-  box-sizing: border-box;
-}
-
-/* Force labels to have the same height */
-#results-container .input-group label {
-  display: block;
-  min-height: 3em;
-  line-height: 1.2;
-}
-
-/* Print styles */
+/* Print Styles */
 @media print {
-  /* Hide everything by default when printing */
-  body * {
-    display: none !important;
-  }
+    body.print-charts #form-container,
+    body.print-charts #results-container,
+    body.print-charts .print-buttons,
+    body.print-charts #amortization-table-container {
+        display: none;
+    }
 
-  /* Show charts when printing charts */
-  body.print-charts #charts-container > div {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    page-break-after: always;
-  }
+    body.print-charts #charts-container {
+        display: block;
+    }
 
-  /* Show amortization schedule when printing schedule */
-  body.print-schedule #amortization-table-container {
-    display: block !important;
-    width: 100% !important;
-  }
+    body.print-schedule #form-container,
+    body.print-schedule #results-container,
+    body.print-schedule .print-buttons,
+    body.print-schedule #charts-container {
+        display: none;
+    }
 
-  /* Ensure the container occupies full width when printing */
-  body.print-charts .container,
-  body.print-schedule .container {
-    margin: 0 !important;
-    max-width: none !important;
-    width: 100% !important;
-  }
+    body.print-schedule #amortization-table-container {
+        display: block;
+    }
 
-  /* Remove margins and padding from body when printing */
-  body.print-charts,
-  body.print-schedule {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
+    /* Adjust table styles for print */
+    #amortization-table th, #amortization-table td {
+        border: 1px solid #000;
+        padding: 8px;
+    }
 
-  /* Adjust table styles for printing */
-  body.print-schedule #amortization-table {
-    width: 100% !important;
-    font-size: 12pt !important;
-  }
-
-  /* Ensure that page breaks occur appropriately */
-  body.print-charts #charts-container > div:last-child {
-    page-break-after: auto;
-  }
-}
-
-/* New styles for the form container with circle */
-.form-with-circle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 20px; /* Space between form and circle */
-}
-
-/* Styles for the Monthly Payment Circle */
-.monthly-payment-circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: #2a9d8f; /* Teal color */
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2em;
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0; /* Prevent shrinking */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .form-with-circle {
-      flex-direction: column;
-      align-items: center;
-  }
-
-  .monthly-payment-circle {
-      margin-top: 20px;
-  }
+    /* Ensure charts fit the printed page */
+    #charts-container > div {
+        width: 100%;
+        max-width: none;
+    }
 }
