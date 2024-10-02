@@ -23,7 +23,7 @@ body {
 }
 
 .container {
-  max-width: 1200px; /* Increased max-width to accommodate wider layouts */
+  width: 97%; 
   margin: 0 auto;
   padding: 20px;
 }
@@ -132,23 +132,17 @@ button:hover {
 }
 
 #charts-container {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;  /* Ensure charts stretch to container's width */
-  justify-content: center;
-  margin-top: 30px;
-  width: 100%;  /* Ensure the container spans the full width */
-  padding: 0 15px;  /* Add padding to prevent overflow */
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
 }
 
 #charts-container > div {
-  display: block;
-  width: 100%;  /* Ensure the chart takes up the full width of its parent */
-  max-width: 100%;  /* Prevent the charts from overflowing the container */
-  min-height: 300px; /* Set a default min height; adjust as needed */
-  margin: 30px 0;  /* Space between charts */
-  box-sizing: border-box;  /* Include padding and borders in the element's width/height */
-  position: relative; /* Ensure proper positioning for Plotly */
+  width: 100%;
+  min-height: 300px;
+  margin: 30px 0;
+  box-sizing: border-box;
+  position: relative;
 }
 
 #amortization-table-container {

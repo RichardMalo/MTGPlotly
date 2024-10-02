@@ -145,6 +145,26 @@ function calculateMortgage(event) {
 
     // Generate amortization table
     createAmortizationTable(scheduleWithExtraTotal, mortgagePayment, extraPayment, firstPaymentDate);
+
+    resizeAllCharts();
+}
+
+/**
+ * Resizes all Plotly charts to fit their containers.
+ */
+function resizeAllCharts() {
+    const chartIds = [
+        'chart', 'chart2', 'chart4', 'chart6', 'chart11', 'chart12', 'chart13',
+        'chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14',
+        'paymentBreakdownCircle' // Include the donut chart if necessary
+    ];
+
+    chartIds.forEach(chartId => {
+        const chartDiv = document.getElementById(chartId);
+        if (chartDiv && chartDiv.style.display !== 'none') {
+            Plotly.Plots.resize(chartDiv);
+        }
+    });
 }
 
 /**
