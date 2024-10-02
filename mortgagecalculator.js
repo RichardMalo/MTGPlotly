@@ -153,46 +153,54 @@ function calculateMortgage(event) {
  * @param {Object} layout - The Plotly layout configuration.
  */
 function plotPaymentBreakdownDonut(schedule, layout) {
-    // Calculate total Principal, Interest, and Extra Payments
-    let sumPrincipal = 0;
-    let sumInterest = 0;
-    let sumExtra = 0;
+    // Check if schedule is not empty
+    if (!schedule || schedule.length === 0) {
+        console.error('Amortization schedule is empty or undefined.');
+        return;
+    }
 
-    schedule.forEach(p => {
-        sumPrincipal += p.principalPayment;
-        sumInterest += p.interestPayment;
-        sumExtra += p.extraPayment;
-    });
+    // Get the first payment's data
+    const firstPayment = schedule[0];
+
+    // Use the exact values from the first payment
+    const principalPayment = firstPayment.principalPayment;
+    const interestPayment = firstPayment.interestPayment;
+    const extraPayment = firstPayment.extraPayment;
 
     // Prepare data for the donut chart
     const data = [{
         type: 'pie',
         labels: ['Principal', 'Interest', 'Extra Payment'],
-        values: [sumPrincipal, sumInterest, sumExtra],
+        values: [principalPayment, interestPayment, extraPayment],
         hole: 0.6, // Makes it a donut chart
         marker: {
             colors: ['#457b9d', '#e63946', '#2a9d8f'] // Colors used in other charts
         },
         textinfo: 'none', // Hide labels inside the slices
-        hoverinfo: 'label+percent',
-        hovertemplate: '<b>%{label}</b>: $%{value:.2f} (%{percent})<extra></extra>' // Display both amount and percentage
+        hoverinfo: 'label+percent+value',
+        hovertemplate: '<b>%{label}</b>: $%{value:.2f} (%{percent})<extra></extra>' // Display amount and percentage
     }];
 
     // Define layout for the donut chart
     const chartLayout = Object.assign({}, layout, {
-        showlegend: false,
+        showlegend: true, // Show legend to identify slices
+        legend: Object.assign({}, layout.legend, {
+            orientation: 'h',
+            x: 0.5,
+            xanchor: 'center',
+            y: -0.1
+        }),
         margin: { t: 40, b: 40, l: 40, r: 40 },
         annotations: [{
-            text: 'Payment Breakdown',
+            text: 'First Payment<br>Breakdown',
             showarrow: false,
             font: {
-                size: 14,
+                size: 16,
                 color: layout.font.color
             },
             x: 0.5,
             y: 0.5
         }],
-        // Removed fixed width and height to allow responsive sizing
         paper_bgcolor: layout.paper_bgcolor,
         plot_bgcolor: layout.plot_bgcolor,
         font: {
@@ -536,6 +544,7 @@ function plotAnnualPaymentSummary(schedule, layout) {
         }),
         height: 400,
     });
+    const config = { responsive: true };
 
     Plotly.newPlot('chart11', [traceInterest, tracePrincipal, traceExtra], chartLayout);
 }
@@ -630,6 +639,8 @@ function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWit
         }),
         height: 400,
     });
+    
+    const config = { responsive: true };
 
     Plotly.newPlot('chart7', data, chartLayout, { responsive: true });
 }
@@ -665,6 +676,8 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart8', data, chartLayout, { responsive: true });
 }
@@ -723,6 +736,8 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
         height: 400,
     });
 
+    const config = { responsive: true };
+
     Plotly.newPlot('chart9', [trace], chartLayout, { responsive: true });
 }
 
@@ -758,6 +773,8 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart10', data, chartLayout, { responsive: true });
 }
@@ -819,6 +836,8 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout, { responsive: true });
 }
@@ -914,6 +933,8 @@ function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWit
         height: 400,
     });
 
+    const config = { responsive: true };
+
     Plotly.newPlot('chart7', data, chartLayout, { responsive: true });
 }
 
@@ -948,6 +969,8 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart8', data, chartLayout, { responsive: true });
 }
@@ -1006,6 +1029,8 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
         height: 400,
     });
 
+    const config = { responsive: true };
+
     Plotly.newPlot('chart9', [trace], chartLayout, { responsive: true });
 }
 
@@ -1041,6 +1066,8 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart10', data, chartLayout, { responsive: true });
 }
@@ -1103,6 +1130,8 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
         height: 400,
     });
 
+    const config = { responsive: true };
+
     Plotly.newPlot('chart14', [traceWithoutExtra, traceWithExtra], chartLayout, { responsive: true });
 }
 
@@ -1157,6 +1186,8 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart12', [trace], chartLayout, { responsive: true });
 }
@@ -1214,6 +1245,8 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
         height: 400,
     });
 
+    const config = { responsive: true };
+
     Plotly.newPlot('chart13', [trace], chartLayout, { responsive: true });
 }
 
@@ -1269,6 +1302,8 @@ function plotInterestPrincipalComponents(schedule, layout) {
         }),
         height: 400,
     });
+
+    const config = { responsive: true };
 
     Plotly.newPlot('chart6', [traceInterest, tracePrincipal], chartLayout, { responsive: true });
 }
