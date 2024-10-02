@@ -23,7 +23,7 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1200px; /* Increased max-width to accommodate wider layouts */
   margin: 0 auto;
   padding: 20px;
 }
@@ -42,6 +42,21 @@ h1, h2, h3 {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px var(--form-shadow);
+  display: flex;
+  flex-direction: row; /* Align form and circles horizontally */
+  align-items: flex-start;
+  gap: 40px; /* Space between form and circles */
+}
+
+.circles-container {
+  display: flex;
+  flex-direction: row; /* Change to row for horizontal alignment */
+  gap: 20px; /* Space between the two circles */
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.form-with-circle form {
+  flex: 1; /* Allow form to take up remaining space */
 }
 
 .input-group {
@@ -119,19 +134,21 @@ button:hover {
 #charts-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;  /* Align charts to the left */
+  align-items: stretch;  /* Ensure charts stretch to container's width */
   justify-content: center;
   margin-top: 30px;
-  width: 100%;  /* Make sure the container spans the full width */
-  padding: 0 15px;  /* Add padding to avoid overflowing */
+  width: 100%;  /* Ensure the container spans the full width */
+  padding: 0 15px;  /* Add padding to prevent overflow */
 }
 
 #charts-container > div {
   display: block;
   width: 100%;  /* Ensure the chart takes up the full width of its parent */
   max-width: 100%;  /* Prevent the charts from overflowing the container */
+  min-height: 300px; /* Set a default min height; adjust as needed */
   margin: 30px 0;  /* Space between charts */
   box-sizing: border-box;  /* Include padding and borders in the element's width/height */
+  position: relative; /* Ensure proper positioning for Plotly */
 }
 
 #amortization-table-container {
@@ -285,21 +302,25 @@ input[type="date"] {
 
 /* Media query for mobile devices */
 @media (max-width: 768px) {
-  .input-group-row {
-    flex-direction: column;
+  #form-container {
+    flex-direction: column; /* Stack form and circles vertically on small screens */
+    align-items: center;
   }
 
-  .input-group-row .input-group {
-    width: 100%;
+  .circles-container {
+    flex-direction: column; /* Stack circles vertically within the container */
+    align-items: center;
   }
 
-  #form-container, #amortization-table-container {
-    padding: 15px;
+  .monthly-payment-circle,
+  .payment-breakdown-circle {
+    width: 300px; /* Adjust sizes for smaller screens */
+    height: 300px;
+    font-size: 3em;
   }
 
   #charts-container > div {
-    margin-left: 0;
-    margin-right: 0;
+    min-height: 250px; /* Adjust min-height for smaller screens */
   }
 }
 
@@ -307,6 +328,10 @@ input[type="date"] {
   #form-container,
   #amortization-table-container {
     border-radius: 0;
+  }
+
+  #charts-container > div {
+    min-height: 300px; /* Adjust min-height for medium screens */
   }
 }
 
@@ -406,36 +431,63 @@ input[type="date"] {
   }
 }
 
-/* New styles for the form container with circle */
-.form-with-circle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 20px;
+/* New styles for the Payment Breakdown Circle */
+.payment-breakdown-circle {
+    width: 320px; /* 2x size from 160px */
+    height: 320px; /* 2x size from 160px */
+    flex-shrink: 0;
+    /* Removed box-shadow to eliminate outline */
+    border-radius: 50%;
+    background-color: transparent; /* Background handled by Plotly */
+    /* Removed margin-top as circles are now side by side */
 }
 
+/* New styles for the Monthly Payment Circle */
 .monthly-payment-circle {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background-color: #2a9d8f;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2em;
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
+    width: 320px; /* 2x size from 160px */
+    height: 320px; /* 2x size from 160px */
+    border-radius: 50%;
+    background-color: #2a9d8f;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4em; /* Adjusted for 2x size */
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .form-with-circle {
-      flex-direction: column;
-      align-items: center;
-  }
+/* Responsive adjustments for Plotly Charts */
+#charts-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;  /* Ensure charts stretch to container's width */
+  justify-content: center;
+  margin-top: 30px;
+  width: 100%;  /* Ensure the container spans the full width */
+  padding: 0 15px;  /* Add padding to prevent overflow */
+}
 
-  .monthly-payment-circle {
-      margin-top: 20px;
+#charts-container > div {
+  display: block;
+  width: 100%;  /* Ensure the chart takes up the full width of its parent */
+  max-width: 100%;  /* Prevent the charts from overflowing the container */
+  min-height: 300px; /* Set a default min height; adjust as needed */
+  margin: 30px 0;  /* Space between charts */
+  box-sizing: border-box;  /* Include padding and borders in the element's width/height */
+  position: relative; /* Ensure proper positioning for Plotly */
+}
+
+/* Ensure responsive heights for charts on smaller screens */
+@media (max-width: 768px) {
+  #charts-container > div {
+    min-height: 250px; /* Adjust min-height for smaller screens */
+  }
+}
+
+@media (max-width: 1200px) {
+  #charts-container > div {
+    min-height: 300px; /* Adjust min-height for medium screens */
   }
 }

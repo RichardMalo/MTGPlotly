@@ -5,7 +5,6 @@
     <title>Mortgage Calculator</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 </head>
 <body>
     <div class="container">
@@ -21,55 +20,62 @@
 
         <h1>Mortgage Calculator</h1>
 
-        <!-- Mortgage Calculator Form and Monthly Payment Circle -->
-        <div id="form-container" class="form-with-circle">
-            <form id="mortgageForm">
-                <div class="input-group-row">
-                    <div class="input-group">
-                        <label for="principal">Principal Amount:</label>
-                        <input type="number" id="principal" name="principal" required placeholder="e.g., 300000" value="500000">
-                    </div>
-                    <div class="input-group">
-                        <label for="interestRate">Interest Rate (%):</label>
-                        <input type="text" id="interestRate" name="interestRate" required placeholder="e.g., 3.5%" value="4.0%">
-                    </div>
-                </div>
-
-                <div class="input-group-row">
-                    <div class="input-group">
-                        <label for="amortization">Amortization (Years):</label>
-                        <input type="number" id="amortization" name="amortization" required placeholder="e.g., 30" value="25" step="any">
-                    </div>
-                    <div class="input-group">
-                        <label for="term">Term Length (Years):</label>
-                        <input type="number" id="term" name="term" required placeholder="e.g., 5" value="5" step="any">
-                    </div>
-                </div>
-
-                <div class="input-group-row">
-                    <div class="input-group">
-                        <label for="extraPayment">Extra Monthly Payment:</label>
-                        <input type="number" id="extraPayment" name="extraPayment" required placeholder="e.g., 200" value="2000">
-                    </div>
-                    <div class="input-group">
-                        <label for="firstPaymentDate">First Payment Date:</label>
-                        <input type="date" id="firstPaymentDate" name="firstPaymentDate" value="2024-10-01">
-                    </div>
-                </div>
-
-                <div class="input-group-row">
-                    <div class="input-group full-width">
-                        <button type="submit">Calculate Mortgage</button>
-                        <button type="button" id="clearDateBtn">Clear Date</button>
-                    </div>
-                </div>
-            </form>
-
-            <!-- New Circle for Monthly Payment -->
-            <div class="monthly-payment-circle" id="monthlyPaymentCircle">
-                $0.00
+<!-- Mortgage Calculator Form and Circles -->
+<div id="form-container" class="form-with-circle">
+    <form id="mortgageForm">
+        <!-- Input Fields -->
+        <div class="input-group-row">
+            <div class="input-group">
+                <label for="principal">Principal Amount:</label>
+                <input type="number" id="principal" name="principal" required placeholder="e.g., 300000" value="500000">
+            </div>
+            <div class="input-group">
+                <label for="interestRate">Interest Rate (%):</label>
+                <input type="text" id="interestRate" name="interestRate" required placeholder="e.g., 3.5%" value="4.0%">
             </div>
         </div>
+
+        <div class="input-group-row">
+            <div class="input-group">
+                <label for="amortization">Amortization (Years):</label>
+                <input type="number" id="amortization" name="amortization" required placeholder="e.g., 30" value="25" step="any">
+            </div>
+            <div class="input-group">
+                <label for="term">Term Length (Years):</label>
+                <input type="number" id="term" name="term" required placeholder="e.g., 5" value="5" step="any">
+            </div>
+        </div>
+
+        <div class="input-group-row">
+            <div class="input-group">
+                <label for="extraPayment">Extra Monthly Payment:</label>
+                <input type="number" id="extraPayment" name="extraPayment" required placeholder="e.g., 200" value="2000">
+            </div>
+            <div class="input-group">
+                <label for="firstPaymentDate">First Payment Date:</label>
+                <input type="date" id="firstPaymentDate" name="firstPaymentDate" value="2024-10-01">
+            </div>
+        </div>
+
+        <div class="input-group-row">
+            <div class="input-group full-width">
+                <button type="submit">Calculate Mortgage</button>
+                <button type="button" id="clearDateBtn">Clear Date</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Circles Container -->
+    <div class="circles-container">
+        <!-- Monthly Payment Circle -->
+        <div class="monthly-payment-circle" id="monthlyPaymentCircle">
+            $0.00
+        </div>
+
+        <!-- Payment Breakdown Donut Chart -->
+        <div class="payment-breakdown-circle" id="paymentBreakdownCircle"></div>
+    </div>
+</div>
 
         <!-- Display Calculated Results -->
         <div id="results-container">

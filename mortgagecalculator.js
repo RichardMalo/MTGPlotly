@@ -93,6 +93,9 @@ function calculateMortgage(event) {
     plotCumulativeChart(scheduleWithExtraTotal, currentLayout);
     plotEquityBuildUp(scheduleWithExtraTotal, principal, currentLayout);
 
+    // Plot the new Payment Breakdown Donut Chart
+    plotPaymentBreakdownDonut(scheduleWithExtraTotal, currentLayout);
+
     let scheduleWithoutExtraTotal = null;
     if (extraPayment > 0) {
         // Compute amortization schedule without extra payments
@@ -142,6 +145,63 @@ function calculateMortgage(event) {
 
     // Generate amortization table
     createAmortizationTable(scheduleWithExtraTotal, mortgagePayment, extraPayment, firstPaymentDate);
+}
+
+/**
+ * Plots the payment breakdown as a donut chart using Plotly.
+ * @param {Array} schedule - The amortization schedule.
+ * @param {Object} layout - The Plotly layout configuration.
+ */
+function plotPaymentBreakdownDonut(schedule, layout) {
+    // Calculate total Principal, Interest, and Extra Payments
+    let sumPrincipal = 0;
+    let sumInterest = 0;
+    let sumExtra = 0;
+
+    schedule.forEach(p => {
+        sumPrincipal += p.principalPayment;
+        sumInterest += p.interestPayment;
+        sumExtra += p.extraPayment;
+    });
+
+    // Prepare data for the donut chart
+    const data = [{
+        type: 'pie',
+        labels: ['Principal', 'Interest', 'Extra Payment'],
+        values: [sumPrincipal, sumInterest, sumExtra],
+        hole: 0.6, // Makes it a donut chart
+        marker: {
+            colors: ['#457b9d', '#e63946', '#2a9d8f'] // Colors used in other charts
+        },
+        textinfo: 'none', // Hide labels inside the slices
+        hoverinfo: 'label+percent',
+        hovertemplate: '<b>%{label}</b>: $%{value:.2f} (%{percent})<extra></extra>' // Display both amount and percentage
+    }];
+
+    // Define layout for the donut chart
+    const chartLayout = Object.assign({}, layout, {
+        showlegend: false,
+        margin: { t: 40, b: 40, l: 40, r: 40 },
+        annotations: [{
+            text: 'Payment Breakdown',
+            showarrow: false,
+            font: {
+                size: 14,
+                color: layout.font.color
+            },
+            x: 0.5,
+            y: 0.5
+        }],
+        // Removed fixed width and height to allow responsive sizing
+        paper_bgcolor: layout.paper_bgcolor,
+        plot_bgcolor: layout.plot_bgcolor,
+        font: {
+            color: layout.font.color
+        }
+    });
+
+    // Plot the donut chart with responsive configuration
+    Plotly.newPlot('paymentBreakdownCircle', data, chartLayout, { responsive: true });
 }
 
 /**
@@ -244,7 +304,6 @@ function plotPaymentBreakdown(schedule, layout) {
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Payment Amount',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -279,28 +338,23 @@ function plotCumulativeChart(schedule, layout) {
         marker: { color: '#457b9d' }
     };
 
-    const xStart = 0;
-    const xEnd = xValues[xValues.length - 1];
-    const xPadding = (xEnd - xStart) * 0.05;
-    const yStart = 0;
-    const yEnd = Math.max(...yValues);
-    const yPadding = yEnd * 0.05;
-
     const chartLayout = Object.assign({}, layout, {
         title: 'Cumulative Payments Over Time',
         xaxis: Object.assign({}, layout.xaxis, {
             title: 'Year',
             tickmode: 'linear',
             dtick: 1,
-            range: [Math.max(0, xStart - xPadding), xEnd + xPadding],
             zeroline: false
         }),
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Payments',
-            range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
+        paper_bgcolor: layout.paper_bgcolor,
+        plot_bgcolor: layout.plot_bgcolor,
+        font: {
+            color: layout.font.color
+        }
     });
 
     const config = { responsive: true };
@@ -352,7 +406,6 @@ function plotEquityBuildUp(schedule, principal, layout) {
             title: 'Equity',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -411,7 +464,6 @@ function plotInterestPrincipalComponents(schedule, layout) {
             title: 'Payment Amount',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -482,7 +534,6 @@ function plotAnnualPaymentSummary(schedule, layout) {
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Payment Amount',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -543,7 +594,6 @@ function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra,
             title: 'Remaining Balance ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -578,7 +628,6 @@ function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWit
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Interest Paid ($)',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -614,7 +663,6 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Loan Term (Years)',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -672,7 +720,6 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
             title: 'Interest Savings ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -709,7 +756,6 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Amount Paid ($)',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -771,7 +817,6 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
             title: 'Cumulative Equity ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -832,7 +877,6 @@ function plotRemainingBalanceComparison(scheduleWithoutExtra, scheduleWithExtra,
             title: 'Remaining Balance ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -867,7 +911,6 @@ function plotTotalInterestComparison(totalInterestWithoutExtra, totalInterestWit
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Interest Paid ($)',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -903,7 +946,6 @@ function plotLoanTermComparison(termWithoutExtraPayments, termWithExtraPayments,
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Loan Term (Years)',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -961,7 +1003,6 @@ function plotInterestSavingsOverTime(scheduleWithoutExtra, scheduleWithExtra, la
             title: 'Interest Savings ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -998,7 +1039,6 @@ function plotTotalPaymentsComparison(scheduleWithoutExtra, scheduleWithExtra, pr
         yaxis: Object.assign({}, layout.yaxis, {
             title: 'Total Amount Paid ($)',
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -1060,7 +1100,6 @@ function plotEquityComparisonOverTime(scheduleWithoutExtra, scheduleWithExtra, p
             title: 'Cumulative Equity ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -1116,7 +1155,6 @@ function plotExtraPaymentEffectOnLoanTerm(principal, monthlyRate, numPayments, l
             title: 'Loan Term (Years)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -1173,7 +1211,6 @@ function plotExtraPaymentEffectOnTotalInterest(principal, monthlyRate, numPaymen
             title: 'Total Interest Paid ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -1230,7 +1267,6 @@ function plotInterestPrincipalComponents(schedule, layout) {
             title: 'Payment Amount ($)',
             range: [yStart - yPadding, yEnd + yPadding]
         }),
-        width: window.innerWidth * 0.97,
         height: 400,
     });
 
@@ -1356,34 +1392,21 @@ document.addEventListener('DOMContentLoaded', function () {
         calculateMortgage(); // Recalculate the mortgage to update chart styles
     });
 
-    // Adjust chart layouts on window resize
-    window.addEventListener('resize', function () {
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        const currentLayout = isDarkMode ? darkLayout : lightLayout;
+// Adjust chart layouts on window resize
+window.addEventListener('resize', function () {
+    const charts = [
+        'chart', 'chart2', 'chart4', 'chart6', 'chart11', 'chart12', 'chart13',
+        'chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'
+    ];
 
-        const charts = [
-            'chart', 'chart2', 'chart4', 'chart6', 'chart11', 'chart12', 'chart13',
-            'chart3', 'chart7', 'chart8', 'chart9', 'chart10', 'chart14'
-        ];
-        charts.forEach(chartId => {
-            const chartDiv = document.getElementById(chartId);
-            if (chartDiv && chartDiv.style.display !== 'none') {
-                Plotly.relayout(chartId, {
-                    width: window.innerWidth * 0.97,
-                    'paper_bgcolor': currentLayout.paper_bgcolor,
-                    'plot_bgcolor': currentLayout.plot_bgcolor,
-                    'font.color': currentLayout.font.color,
-                    'xaxis.tickfont.color': currentLayout.xaxis.tickfont.color,
-                    'yaxis.tickfont.color': currentLayout.yaxis.tickfont.color,
-                    'xaxis.titlefont.color': currentLayout.xaxis.titlefont.color,
-                    'yaxis.titlefont.color': currentLayout.yaxis.titlefont.color,
-                    'xaxis.gridcolor': currentLayout.xaxis.gridcolor,
-                    'yaxis.gridcolor': currentLayout.yaxis.gridcolor,
-                    'legend.font.color': currentLayout.legend.font.color
-                });
-            }
-        });
+    charts.forEach(chartId => {
+        const chartDiv = document.getElementById(chartId);
+        if (chartDiv && chartDiv.style.display !== 'none') {
+            // Trigger Plotly to resize the chart
+            Plotly.Plots.resize(chartDiv);
+        }
     });
+});
 
     // Print buttons
     const printChartsBtn = document.getElementById('printChartsBtn');
