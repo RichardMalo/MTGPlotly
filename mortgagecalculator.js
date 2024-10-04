@@ -1540,3 +1540,39 @@ function clearComparisonCharts() {
 function formatNumber(numberStr) {
     return Number(numberStr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+        // Adjust form container for mobile
+        const formContainer = document.getElementById('form-container');
+        formContainer.style.flexDirection = 'column';
+        formContainer.style.alignItems = 'center';
+
+        // Adjust circles container for better stacking on mobile
+        const circlesContainer = document.querySelector('.circles-container');
+        circlesContainer.style.flexDirection = 'column';
+        circlesContainer.style.alignItems = 'center';
+
+        // Increase padding for inputs for easier touch interaction
+        const inputs = document.querySelectorAll('input[type="number"], input[type="text"], input[type="date"]');
+        inputs.forEach(input => {
+            input.style.padding = '15px';
+            input.style.fontSize = '18px';
+        });
+
+        // Adjust button sizes for easier tap
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.style.padding = '15px';
+            button.style.fontSize = '18px';
+        });
+
+        // Make the circles larger for better visibility
+        const circles = document.querySelectorAll('.monthly-payment-circle, .payment-breakdown-circle');
+        circles.forEach(circle => {
+            circle.style.width = '250px';
+            circle.style.height = '250px';
+        });
+    }
+});

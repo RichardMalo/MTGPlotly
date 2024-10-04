@@ -485,3 +485,39 @@ input[type="date"] {
     min-height: 300px; /* Adjust min-height for medium screens */
   }
 }
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  #form-container {
+    flex-direction: column; /* Stack form and circles vertically on small screens */
+    align-items: center;
+  }
+
+  .circles-container {
+    flex-direction: column; /* Stack circles vertically within the container */
+    align-items: center;
+  }
+
+  .monthly-payment-circle,
+  .payment-breakdown-circle {
+    width: 250px; /* Adjust sizes for smaller screens */
+    height: 250px;
+    font-size: 2.5em;
+  }
+
+  #charts-container > div {
+    min-height: 250px; /* Adjust min-height for smaller screens */
+  }
+
+  button {
+    padding: 15px; /* Increase button padding for easier touch */
+    font-size: 18px;
+  }
+
+  input[type="number"],
+  input[type="text"],
+  input[type="date"] {
+    padding: 15px; /* Increase input padding for easier touch */
+    font-size: 18px;
+  }
+}
