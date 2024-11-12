@@ -41,8 +41,6 @@ An interactive mortgage calculator that helps you understand your mortgage payme
 
 ![Mortgage Calculator Screenshot](screenshot.png)
 
-*Note: Replace `screenshot.png` with an actual screenshot of your application.*
-
 ## Usage
 
 1. **Access the Calculator:**
