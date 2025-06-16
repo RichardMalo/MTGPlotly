@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Mortgage Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Plotly -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
@@ -12,7 +14,6 @@
         <div class="mode-toggle">
             <label for="mode-switch">Dark Mode</label>
             <label class="switch">
-                <!-- Added 'checked' attribute to enable Dark Mode by default -->
                 <input type="checkbox" id="mode-switch" checked>
                 <span class="slider"></span>
             </label>
@@ -20,62 +21,56 @@
 
         <h1>Mortgage Calculator</h1>
 
-<!-- Mortgage Calculator Form and Circles -->
-<div id="form-container" class="form-with-circle">
-    <form id="mortgageForm">
-        <!-- Input Fields -->
-        <div class="input-group-row">
-            <div class="input-group">
-                <label for="principal">Principal Amount:</label>
-                <input type="number" id="principal" name="principal" required placeholder="e.g., 300000" value="500000">
-            </div>
-            <div class="input-group">
-                <label for="interestRate">Interest Rate (%):</label>
-                <input type="text" id="interestRate" name="interestRate" required placeholder="e.g., 3.5%" value="4.0%">
+        <!-- Error Display -->
+        <div id="error-message" role="alert" style="display:none"></div>
+
+        <!-- Mortgage Calculator Form and Circles -->
+        <div id="form-container" class="form-with-circle">
+            <form id="mortgageForm" autocomplete="off">
+                <div class="input-group-row">
+                    <div class="input-group">
+                        <label for="principal">Principal Amount:</label>
+                        <input type="number" id="principal" name="principal" required placeholder="e.g., 300000" value="894000" step="1000" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="interestRate">Interest Rate (%):</label>
+                        <input type="number" id="interestRate" name="interestRate" step="0.01" required placeholder="e.g., 3.5" value="2.62" min="0">
+                    </div>
+                </div>
+                <div class="input-group-row">
+                    <div class="input-group">
+                        <label for="amortization">Amortization (Years):</label>
+                        <input type="number" id="amortization" name="amortization" required placeholder="e.g., 30" value="20" step="any" min="1" max="40">
+                    </div>
+                    <div class="input-group">
+                        <label for="term">Term Length (Years):</label>
+                        <input type="number" id="term" name="term" required placeholder="e.g., 5" value="5" step="any" min="1">
+                    </div>
+                </div>
+                <div class="input-group-row">
+                    <div class="input-group">
+                        <label for="extraPayment">Extra Monthly Payment:</label>
+                        <input type="number" id="extraPayment" name="extraPayment" required placeholder="e.g., 200" value="2000" step="50" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="firstPaymentDate">First Payment Date:</label>
+                        <input type="date" id="firstPaymentDate" name="firstPaymentDate" value="2025-07-01">
+                    </div>
+                </div>
+                <div class="input-group-row">
+                    <div class="input-group full-width">
+                        <button type="submit">Calculate Mortgage</button>
+                        <button type="button" id="clearDateBtn">Clear Date</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Circles Container -->
+            <div class="circles-container">
+                <div class="monthly-payment-circle" id="monthlyPaymentCircle" aria-live="polite">$0.00</div>
+                <div class="payment-breakdown-circle" id="paymentBreakdownCircle" aria-live="polite"></div>
             </div>
         </div>
-
-        <div class="input-group-row">
-            <div class="input-group">
-                <label for="amortization">Amortization (Years):</label>
-                <input type="number" id="amortization" name="amortization" required placeholder="e.g., 30" value="25" step="any">
-            </div>
-            <div class="input-group">
-                <label for="term">Term Length (Years):</label>
-                <input type="number" id="term" name="term" required placeholder="e.g., 5" value="5" step="any">
-            </div>
-        </div>
-
-        <div class="input-group-row">
-            <div class="input-group">
-                <label for="extraPayment">Extra Monthly Payment:</label>
-                <input type="number" id="extraPayment" name="extraPayment" required placeholder="e.g., 200" value="2000">
-            </div>
-            <div class="input-group">
-                <label for="firstPaymentDate">First Payment Date:</label>
-                <input type="date" id="firstPaymentDate" name="firstPaymentDate" value="2024-11-01">
-            </div>
-        </div>
-
-        <div class="input-group-row">
-            <div class="input-group full-width">
-                <button type="submit">Calculate Mortgage</button>
-                <button type="button" id="clearDateBtn">Clear Date</button>
-            </div>
-        </div>
-    </form>
-
-    <!-- Circles Container -->
-    <div class="circles-container">
-        <!-- Monthly Payment Circle -->
-        <div class="monthly-payment-circle" id="monthlyPaymentCircle">
-            $0.00
-        </div>
-
-        <!-- Payment Breakdown Donut Chart -->
-        <div class="payment-breakdown-circle" id="paymentBreakdownCircle"></div>
-    </div>
-</div>
 
         <!-- Display Calculated Results -->
         <div id="results-container">
@@ -96,44 +91,46 @@
         </div>
     </div>
 
-    <!-- Charts -->
-    <div id="charts-container">
-        <div id="chart"></div>
-        <div id="chart2"></div>
-        <div id="chart4"></div>
-        <div id="chart6"></div>
-        <div id="chart11"></div>
-        <div id="chart12"></div>
-        <div id="chart13"></div>
-
-        <!-- Comparison Charts (Initially Hidden) -->
-        <div id="chart3" style="display: none;"></div>
-        <div id="chart7" style="display: none;"></div>
-        <div id="chart8" style="display: none;"></div>
-        <div id="chart9" style="display: none;"></div>
-        <div id="chart10" style="display: none;"></div>
-        <div id="chart14" style="display: none;"></div>
+    <!-- Printable Content Starts Here -->
+    <div id="printable-content">
+        <!-- Charts -->
+        <div id="charts-container">
+            <div id="chart"></div>
+            <div id="chart2"></div>
+            <div id="chart4"></div>
+            <div id="chart6"></div>
+            <div id="chart11"></div>
+            <div id="chart12"></div>
+            <div id="chart13"></div>
+            <!-- Comparison Charts, initially hidden -->
+            <div id="comp-chart3-box" style="display: none;"><div id="chart3"></div></div>
+            <div id="comp-chart7-box" style="display: none;"><div id="chart7"></div></div>
+            <div id="comp-chart8-box" style="display: none;"><div id="chart8"></div></div>
+            <div id="comp-chart9-box" style="display: none;"><div id="chart9"></div></div>
+            <div id="comp-chart10-box" style="display: none;"><div id="chart10"></div></div>
+            <div id="comp-chart14-box" style="display: none;"><div id="chart14"></div></div>
+        </div>
+        <!-- Amortization Table -->
+        <div id="amortization-table-container">
+            <h2>Amortization Schedule</h2>
+            <table id="amortization-table">
+                <thead>
+                    <tr>
+                        <th>Payment # / Date</th>
+                        <th>Payment Amount</th>
+                        <th>Extra Payment</th>
+                        <th>Principal Paid</th>
+                        <th>Interest Paid</th>
+                        <th>Remaining Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows inserted by JS -->
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <!-- Amortization Table -->
-    <div id="amortization-table-container">
-        <h2>Amortization Schedule</h2>
-        <table id="amortization-table">
-            <thead>
-                <tr>
-                    <th>Payment # / Date</th>
-                    <th>Payment Amount</th>
-                    <th>Extra Payment</th>
-                    <th>Principal Paid</th>
-                    <th>Interest Paid</th>
-                    <th>Remaining Balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Table rows will be inserted here by JavaScript -->
-            </tbody>
-        </table>
-    </div>
+    <!-- Printable Content Ends Here -->
 
     <!-- Print Buttons -->
     <div class="print-buttons">
@@ -141,7 +138,92 @@
         <button id="printScheduleBtn">Print Amortization Schedule</button>
     </div>
 
-    <!-- Include JavaScript File -->
+    <!-- Include your JS logic -->
     <script src="mortgagecalculator.js"></script>
+    <script>
+    // Plotly print-to-image logic with print mode control
+    const chartIDs = [
+        "chart", "chart2", "chart4", "chart6",
+        "chart11", "chart12", "chart13",
+        "chart3", "chart7", "chart8", "chart9", "chart10", "chart14"
+    ];
+    let chartImageMap = {};
+
+    async function replaceChartsWithImages() {
+        chartImageMap = {}; // Reset mapping
+        for (let id of chartIDs) {
+            const chartDiv = document.getElementById(id);
+            if (chartDiv && chartDiv.offsetParent !== null && chartDiv.classList.contains('js-plotly-plot')) {
+                try {
+                    const imgURL = await Plotly.toImage(chartDiv, {format: 'png', height: chartDiv.offsetHeight || 300, width: chartDiv.offsetWidth || 600, scale: 2});
+                    const imgElem = document.createElement('img');
+                    imgElem.src = imgURL;
+                    imgElem.style.width = '100%';
+                    imgElem.style.height = 'auto';
+                    imgElem.className = 'print-chart-image';
+                    chartImageMap[id] = chartDiv.cloneNode(true);
+                    chartDiv.parentNode.replaceChild(imgElem, chartDiv);
+                } catch (e) { }
+            }
+        }
+    }
+    function restoreCharts() {
+        for (let id of Object.keys(chartImageMap)) {
+            const imgElem = document.querySelector('#' + id + '.print-chart-image') ||
+                (document.getElementById(id) && document.getElementById(id).tagName.toLowerCase() === 'img' ? document.getElementById(id) : null);
+            if (imgElem) {
+                imgElem.parentNode.replaceChild(chartImageMap[id], imgElem);
+            }
+        }
+        chartImageMap = {};
+    }
+
+    // Set print mode: "charts-and-table" or "amortization-only"
+    function setPrintMode(mode) {
+        document.body.classList.remove('print-charts-and-table', 'print-amortization-only');
+        if (mode === 'charts-and-table') {
+            document.body.classList.add('print-charts-and-table');
+        } else if (mode === 'amortization-only') {
+            document.body.classList.add('print-amortization-only');
+        }
+    }
+    function clearPrintMode() {
+        document.body.classList.remove('print-charts-and-table', 'print-amortization-only');
+    }
+
+    function printWithChartsAndTable() {
+        setPrintMode('charts-and-table');
+        replaceChartsWithImages().then(() => {
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    restoreCharts();
+                    clearPrintMode();
+                }, 500);
+            }, 200);
+        });
+    }
+    function printAmortizationOnly() {
+        setPrintMode('amortization-only');
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                restoreCharts(); // In case images were present from a previous print
+                clearPrintMode();
+            }, 500);
+        }, 200);
+    }
+
+    document.getElementById('printChartsBtn').onclick = function () {
+        printWithChartsAndTable();
+    };
+    document.getElementById('printScheduleBtn').onclick = function () {
+        printAmortizationOnly();
+    };
+    window.onafterprint = function() {
+        restoreCharts();
+        clearPrintMode();
+    };
+    </script>
 </body>
 </html>

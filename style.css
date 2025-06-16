@@ -43,20 +43,20 @@ h1, h2, h3 {
   border-radius: 8px;
   box-shadow: 0 4px 6px var(--form-shadow);
   display: flex;
-  flex-direction: row; /* Align form and circles horizontally */
+  flex-direction: row;
   align-items: flex-start;
-  gap: 40px; /* Space between form and circles */
+  gap: 40px;
 }
 
 .circles-container {
   display: flex;
-  flex-direction: row; /* Change to row for horizontal alignment */
-  gap: 20px; /* Space between the two circles */
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  flex-direction: row;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .form-with-circle form {
-  flex: 1; /* Allow form to take up remaining space */
+  flex: 1;
 }
 
 .input-group {
@@ -106,7 +106,6 @@ button:hover {
   background-color: var(--button-hover);
 }
 
-/* New styles for the buttons container */
 .input-group.full-width {
   display: flex;
   justify-content: center;
@@ -260,7 +259,6 @@ body.dark-mode #results-container .input-group input {
   border-color: var(--input-border);
 }
 
-/* Ensure that placeholder text is visible in dark mode */
 body.dark-mode ::-webkit-input-placeholder {
   color: var(--text-color);
   opacity: 0.7;
@@ -278,7 +276,6 @@ body.dark-mode ::placeholder {
   opacity: 0.7;
 }
 
-/* Ensure transitions apply when variables change */
 body {
   transition: background-color 0.3s, color 0.3s;
 }
@@ -294,27 +291,26 @@ input[type="date"] {
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-/* Media query for mobile devices */
 @media (max-width: 768px) {
   #form-container {
-    flex-direction: column; /* Stack form and circles vertically on small screens */
+    flex-direction: column;
     align-items: center;
   }
 
   .circles-container {
-    flex-direction: column; /* Stack circles vertically within the container */
+    flex-direction: column;
     align-items: center;
   }
 
   .monthly-payment-circle,
   .payment-breakdown-circle {
-    width: 300px; /* Adjust sizes for smaller screens */
+    width: 300px;
     height: 300px;
     font-size: 3em;
   }
 
   #charts-container > div {
-    min-height: 250px; /* Adjust min-height for smaller screens */
+    min-height: 250px;
   }
 }
 
@@ -325,11 +321,10 @@ input[type="date"] {
   }
 
   #charts-container > div {
-    min-height: 300px; /* Adjust min-height for medium screens */
+    min-height: 300px;
   }
 }
 
-/* Style for print buttons */
 .print-buttons {
   text-align: center;
   margin-top: 20px;
@@ -340,7 +335,6 @@ input[type="date"] {
   padding: 10px 20px;
 }
 
-/* Adjust input groups inside the results-container */
 #results-container .results-row {
   display: flex;
   flex-wrap: wrap;
@@ -370,154 +364,175 @@ input[type="date"] {
   box-sizing: border-box;
 }
 
-/* Force labels to have the same height */
 #results-container .input-group label {
   display: block;
   min-height: 3em;
   line-height: 1.2;
 }
 
-/* Print styles */
-@media print {
-  /* Hide everything by default when printing */
-  body * {
-    display: none !important;
-  }
-
-  /* Show charts when printing charts */
-  body.print-charts #charts-container > div {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    page-break-after: always;
-  }
-
-  /* Show amortization schedule when printing schedule */
-  body.print-schedule #amortization-table-container {
-    display: block !important;
-    width: 100% !important;
-  }
-
-  /* Ensure the container occupies full width when printing */
-  body.print-charts .container,
-  body.print-schedule .container {
-    margin: 0 !important;
-    max-width: none !important;
-    width: 100% !important;
-  }
-
-  /* Remove margins and padding from body when printing */
-  body.print-charts,
-  body.print-schedule {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Adjust table styles for printing */
-  body.print-schedule #amortization-table {
-    width: 100% !important;
-    font-size: 12pt !important;
-  }
-
-  /* Ensure that page breaks occur appropriately */
-  body.print-charts #charts-container > div:last-child {
-    page-break-after: auto;
-  }
-}
-
-/* New styles for the Payment Breakdown Circle */
 .payment-breakdown-circle {
-    width: 320px; /* 2x size from 160px */
-    height: 320px; /* 2x size from 160px */
+    width: 320px;
+    height: 320px;
     flex-shrink: 0;
-    /* Removed box-shadow to eliminate outline */
     border-radius: 50%;
-    background-color: transparent; /* Background handled by Plotly */
-    /* Removed margin-top as circles are now side by side */
+    background-color: transparent;
 }
 
-/* New styles for the Monthly Payment Circle */
 .monthly-payment-circle {
-    width: 320px; /* 2x size from 160px */
-    height: 320px; /* 2x size from 160px */
+    width: 320px;
+    height: 320px;
     border-radius: 50%;
     background-color: #2a9d8f;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 4em; /* Adjusted for 2x size */
+    font-size: 4em;
     font-weight: bold;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
 }
 
-/* Responsive adjustments for Plotly Charts */
 #charts-container {
   display: flex;
   flex-direction: column;
-  align-items: stretch;  /* Ensure charts stretch to container's width */
+  align-items: stretch;
   justify-content: center;
   margin-top: 30px;
-  width: 100%;  /* Ensure the container spans the full width */
-  padding: 0 15px;  /* Add padding to prevent overflow */
+  width: 100%;
+  padding: 0 15px;
 }
 
 #charts-container > div {
   display: block;
-  width: 100%;  /* Ensure the chart takes up the full width of its parent */
-  max-width: 100%;  /* Prevent the charts from overflowing the container */
-  min-height: 300px; /* Set a default min height; adjust as needed */
-  margin: 30px 0;  /* Space between charts */
-  box-sizing: border-box;  /* Include padding and borders in the element's width/height */
-  position: relative; /* Ensure proper positioning for Plotly */
+  width: 100%;
+  max-width: 100%;
+  min-height: 300px;
+  margin: 30px 0;
+  box-sizing: border-box;
+  position: relative;
 }
 
-/* Ensure responsive heights for charts on smaller screens */
 @media (max-width: 768px) {
   #charts-container > div {
-    min-height: 250px; /* Adjust min-height for smaller screens */
+    min-height: 250px;
   }
 }
 
 @media (max-width: 1200px) {
   #charts-container > div {
-    min-height: 300px; /* Adjust min-height for medium screens */
+    min-height: 300px;
   }
 }
 
-/* Media query for mobile devices */
 @media (max-width: 768px) {
   #form-container {
-    flex-direction: column; /* Stack form and circles vertically on small screens */
+    flex-direction: column;
     align-items: center;
   }
 
   .circles-container {
-    flex-direction: column; /* Stack circles vertically within the container */
+    flex-direction: column;
     align-items: center;
   }
 
   .monthly-payment-circle,
   .payment-breakdown-circle {
-    width: 250px; /* Adjust sizes for smaller screens */
+    width: 250px;
     height: 250px;
     font-size: 2.5em;
   }
 
   #charts-container > div {
-    min-height: 250px; /* Adjust min-height for smaller screens */
+    min-height: 250px;
   }
 
   button {
-    padding: 15px; /* Increase button padding for easier touch */
+    padding: 15px;
     font-size: 18px;
   }
 
   input[type="number"],
   input[type="text"],
   input[type="date"] {
-    padding: 15px; /* Increase input padding for easier touch */
+    padding: 15px;
     font-size: 18px;
+  }
+}
+
+/*======================== PRINT ONLY BELOW THIS LINE ========================*/
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    color: #000 !important;
+  }
+
+  /* Show only amortization table in amortization-only mode */
+  body.print-amortization-only #amortization-table-container,
+  body.print-amortization-only #amortization-table-container * {
+    visibility: visible !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  body.print-amortization-only #printable-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+  }
+  body.print-amortization-only #charts-container,
+  body.print-amortization-only #charts-container * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Show charts and table in charts-and-table mode */
+  body.print-charts-and-table #printable-content,
+  body.print-charts-and-table #printable-content * {
+    visibility: visible !important;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  body.print-charts-and-table #printable-content {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* Hide all non-printable UI for both print modes */
+  .container, .print-buttons, .mode-toggle, #results-container, #form-container {
+    display: none !important;
+  }
+  /* Plotly backgrounds for chart print */
+  .js-plotly-plot,
+  .plotly,
+  #charts-container, #charts-container * {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  /* Amortization table for print */
+  #amortization-table th, #amortization-table td {
+    border: 1px solid #222 !important;
+    color: #000 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  #amortization-table th {
+    background: #eee !important;
+    color: #111 !important;
   }
 }
